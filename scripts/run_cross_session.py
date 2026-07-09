@@ -1,0 +1,394 @@
+"""True cross-session memory benchmark driver.
+
+Modeled on scripts/run_full_benchmark.py (same resumability, endpoint checks, and
+SWE-bench-Live Docker scoring flow). The difference is WHERE each memory arm's
+memory comes from:
+
+  run_full_benchmark: every task retrieves from a pre-mined git-history corpus
+                      (the instance's memory_corpus.path) -- a proxy for memory.
+
+  run_cross_session:  each memory arm keeps a PERSISTENT, per-(arm, repo) store
+                      that starts EMPTY. Repos are processed as chronological
+                      sequences; after each task the arm writes a memory record
+                      (issue + final agent message + resulting patch + verdict)
+                      into its store, so before task k the store holds only what
+                      the agent produced on tasks 1..k-1 of that repo. This is the
+                      "does memory the agent accumulates itself help later tasks?"
+                      experiment. Pass --use-mined-corpus to fall back to the old
+                      mined-corpus behaviour instead (default: off).
+
+Repo/code state per task is unchanged from the single-task setup: setup_workspace
+always makes a fresh checkout at the instance's base commit. Only MEMORY persists.
+
+ADAPTER-INTERFACE COMPROMISE (uniform across arms, documented on purpose):
+  The membership adapters expose retrieve()/write(), but every shipped write() is a
+  no-op and each adapter only knows how to INGEST a corpus directory of jsonl files
+  (documents.jsonl / project_memory.jsonl / events.jsonl). Rather than teach each
+  arm a bespoke agent-memory-writing path, we implement the simple, uniform version:
+  after each task we append one memory record to the arm's store as a corpus
+  document (project_memory.jsonl for the `structured` arm, documents.jsonl for every
+  other arm -- both formats every adapter's ingestion already reads), then point the
+  next task's instance.memory_corpus.path at a fresh snapshot of that store. The
+  snapshot dir name is unique per (arm, repo, k) so the caching adapters
+  (mem0 / graphiti / graphify, which key their built stores by corpus dir name and
+  skip re-ingestion via an .ingested marker) rebuild from the grown corpus each task
+  instead of serving a stale first-task store. Cost: those three re-ingest the full
+  accumulated corpus at every task (LLM extraction), so a long sequence is O(k^2)
+  ingestion work for them -- inherent to honest cross-session, noted here.
+
+Run under caffeinate in tmux (do NOT reuse the membench-full session name):
+  tmux new -d -s membench-cross 'caffeinate -dims python3 scripts/run_cross_session.py \
+      > runs/cross_session/driver.log 2>&1'
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+MB = Path(os.environ.get("MEMBENCH_ROOT", Path(__file__).resolve().parent.parent))
+SWB = Path(os.environ.get("SWB_ROOT", str(Path.home() / "SWE-bench-Live")))
+DOCKER_BIN = os.environ.get("DOCKER_BIN", "docker")
+CONFIG = os.environ.get("MEMBENCH_CONFIG", "configs/claude_code_qwen_pectra.toml")
+ARMS = ["none", "raw_rag", "structured", "claude_mem", "mem0", "graphiti", "graphify"]
+MEMORY_ARMS = [a for a in ARMS if a != "none"]
+
+DATASET_DIR = MB / "dataset/cross_session"
+SEQUENCES = DATASET_DIR / "sequences.jsonl"
+INSTANCES = DATASET_DIR / "instances.jsonl"
+# template_dir / mined corpus paths in the instance dicts are relative to the
+# original full dataset dir, not dataset/cross_session.
+ORIG_DATASET = MB / "dataset/swebench_live_full"
+RUNS = MB / "runs/cross_session"
+AGENT_TIMEOUT = 2400
+EVAL_TIMEOUT = 3600
+
+CORPUS_FILES = ("documents.jsonl", "project_memory.jsonl", "events.jsonl")
+
+
+def log(msg: str) -> None:
+    print(f"[{time.strftime('%m-%d %H:%M:%S')}] {msg}", flush=True)
+
+
+# --- endpoint / scoring helpers (copied from run_full_benchmark to stay decoupled) -
+
+def endpoints_ok() -> bool:
+    for url in ("http://localhost:8000/health", "http://localhost:8001/v1/models"):
+        r = subprocess.run(["curl", "-s", "-m", "5", "-o", "/dev/null", url])
+        if r.returncode != 0:
+            return False
+    return True
+
+
+def ensure_endpoints() -> None:
+    for i in range(30):  # up to 15 min
+        if endpoints_ok():
+            return
+        log(f"endpoints down, retry {i+1}/30")
+        time.sleep(30)
+    log("ENDPOINTS-DEAD, exiting for operator")
+    sys.exit(3)
+
+
+def image_for(iid: str) -> str:
+    return f"starryzhang/sweb.eval.x86_64.{iid.replace('__', '_1776_')}:latest"
+
+
+def strip_patch(patch: str) -> str:
+    keep, block, skip = [], [], False
+    for l in patch.splitlines(keepends=True):
+        if l.startswith("diff --git"):
+            if block and not skip:
+                keep += block
+            block, skip = [l], ("__pycache__" in l or l.rstrip().endswith(".pyc"))
+        else:
+            block.append(l)
+    if block and not skip:
+        keep += block
+    return "".join(keep)
+
+
+def score(iid: str, arm: str) -> bool | None:
+    pred = _load_prediction(iid, arm)
+    if pred is None or pred.get("status") != "ok":
+        return None
+    patch = strip_patch(pred.get("model_patch") or "")
+    if not patch.strip():
+        return False
+    tmp = RUNS / arm / f".tmp_{iid}_patch.json"
+    tmp.write_text(json.dumps({iid: {"model_patch": patch}}))
+    out_dir = RUNS / arm / "docker_eval" / iid
+    try:
+        subprocess.run(
+            [str(SWB / ".venv/bin/python"), "-m", "evaluation.evaluation",
+             "--dataset", "SWE-bench-Live/SWE-bench-Live", "--split", "lite",
+             "--platform", "linux", "--patch_dir", str(tmp),
+             "--output_dir", str(out_dir), "--workers", "1", "--overwrite", "1"],
+            cwd=SWB, capture_output=True, text=True, timeout=EVAL_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        return None
+    finally:
+        tmp.unlink(missing_ok=True)
+    results = out_dir / "results.json"
+    if not results.exists():
+        return None
+    return iid in json.load(results.open()).get("success_ids", [])
+
+
+# --- persistent per-(arm, repo) memory store ------------------------------------
+
+def _sanitize(repo: str) -> str:
+    return repo.replace("/", "__")
+
+
+def mem_dir(arm: str, repo: str) -> Path:
+    """Canonical, growing store for one (arm, repo). Holds the accumulated corpus."""
+    return RUNS / arm / "mem" / _sanitize(repo)
+
+
+def snapshot_dir(arm: str, repo: str, k: int) -> Path:
+    """Per-task snapshot pointed at by instance.memory_corpus.path for task k.
+
+    Unique name per k defeats the caching adapters' .ingested short-circuit.
+    """
+    return RUNS / arm / "mem_snap" / f"{_sanitize(repo)}__k{k}"
+
+
+def build_snapshot(arm: str, repo: str, k: int) -> Path:
+    """Copy the store (tasks 1..k-1) into a fresh snapshot dir and return it."""
+    src = mem_dir(arm, repo)
+    dst = snapshot_dir(arm, repo, k)
+    if dst.exists():
+        shutil.rmtree(dst)
+    dst.mkdir(parents=True, exist_ok=True)
+    for fn in CORPUS_FILES:
+        if (src / fn).exists():
+            shutil.copy2(src / fn, dst / fn)
+    return dst
+
+
+def _load_prediction(iid: str, arm: str) -> dict | None:
+    path = RUNS / arm / "predictions.jsonl"
+    pred = None
+    if path.exists():
+        for l in path.read_text().splitlines():
+            if l.strip():
+                d = json.loads(l)
+                if d.get("instance_id") == iid:
+                    pred = d
+    return pred
+
+
+def _mem_file(arm: str) -> str:
+    # structured reads project_memory.jsonl; every other arm's ingestion reads
+    # documents.jsonl. Write only the file the arm actually consumes.
+    return "project_memory.jsonl" if arm == "structured" else "documents.jsonl"
+
+
+def _record_text(inst: dict, pred: dict | None, resolved) -> str:
+    issue = inst.get("issue", {})
+    title = str(issue.get("title", ""))
+    patch = str((pred or {}).get("model_patch") or "")
+    final = str((pred or {}).get("prediction") or "")
+    return (
+        f"Issue: {title}\n"
+        f"Outcome: resolved={resolved}\n"
+        f"Agent notes:\n{final[:1200]}\n"
+        f"Patch:\n{patch[:3000]}"
+    )
+
+
+def write_memory(arm: str, repo: str, inst: dict, resolved) -> None:
+    """Append one agent-written memory record for the just-finished task.
+
+    Idempotent (keyed by cs_<iid>) so resumed runs rebuild the store in order
+    without duplicating rows.
+    """
+    if arm == "none":
+        return
+    iid = inst["instance_id"]
+    mid = f"cs_{iid}"
+    fn = _mem_file(arm)
+    path = mem_dir(arm, repo) / fn
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        for l in path.read_text().splitlines():
+            if l.strip() and json.loads(l).get("id") == mid:
+                return  # already recorded
+    pred = _load_prediction(iid, arm)
+    text = _record_text(inst, pred, resolved)
+    created_at = str(inst.get("issue", {}).get("created_at", ""))
+    if arm == "structured":
+        row = {
+            "id": mid, "kind": "task_outcome",
+            "key": str(inst.get("issue", {}).get("title", "")),
+            "value": text, "source": "cross_session_write",
+            "created_at": created_at, "confidence": 1.0, "evidence": [iid],
+        }
+    else:
+        row = {
+            "id": mid,
+            "title": f"Prior task {iid}: {inst.get('issue', {}).get('title', '')}",
+            "text": text, "source": "cross_session_write", "created_at": created_at,
+        }
+    with path.open("a") as fh:
+        fh.write(json.dumps(row) + "\n")
+
+
+# --- agent invocation -----------------------------------------------------------
+
+def run_agent(inst: dict, arm: str, repo: str, k: int, use_mined: bool) -> None:
+    iid = inst["instance_id"]
+    arm_dir = RUNS / arm
+    arm_dir.mkdir(parents=True, exist_ok=True)
+    tmp_inst = arm_dir / f".tmp_{iid}.jsonl"
+    tmp_pred = arm_dir / f".tmp_{iid}_pred.jsonl"
+
+    workspace = {**inst["workspace"],
+                 "template_dir": str(ORIG_DATASET / inst["workspace"]["template_dir"])}
+    inst = {**inst, "workspace": workspace}
+    if arm != "none" and not use_mined:
+        # Point memory at this arm's persistent store (empty for k=1).
+        snap = build_snapshot(arm, repo, k)
+        inst = {**inst, "memory_corpus": {**inst.get("memory_corpus", {}),
+                                          "path": str(snap)}}
+    elif use_mined:
+        # Keep the mined corpus but absolutize its (MB-relative) path.
+        mc = inst.get("memory_corpus", {})
+        if mc.get("path"):
+            inst = {**inst, "memory_corpus": {**mc, "path": str(MB / mc["path"])}}
+
+    tmp_inst.write_text(json.dumps(inst) + "\n")
+    cmd = ["uv", "run", "--python", "3.13", "python", "-m", "membench", "run",
+           "--config", CONFIG, "--instances", str(tmp_inst),
+           "--output", str(tmp_pred), "--adapter", arm]
+    try:
+        r = subprocess.run(cmd, cwd=MB, capture_output=True, text=True, timeout=AGENT_TIMEOUT)
+        line = tmp_pred.read_text().strip() if tmp_pred.exists() else ""
+        if not line:
+            line = json.dumps({"instance_id": iid, "status": "error",
+                               "error": f"runner rc={r.returncode}: {r.stderr[-300:]}",
+                               "resolved": None, "wall_time_sec": 0})
+    except subprocess.TimeoutExpired:
+        line = json.dumps({"instance_id": iid, "status": "error",
+                           "error": "agent timeout", "resolved": None,
+                           "wall_time_sec": AGENT_TIMEOUT})
+    with (arm_dir / "predictions.jsonl").open("a") as fh:
+        fh.write(line.splitlines()[0] + "\n")
+    tmp_inst.unlink(missing_ok=True)
+    tmp_pred.unlink(missing_ok=True)
+
+
+# --- resumability ---------------------------------------------------------------
+
+def load_done_predictions(arm: str) -> set[str]:
+    p = RUNS / arm / "predictions.jsonl"
+    if not p.exists():
+        return set()
+    return {json.loads(l)["instance_id"] for l in p.read_text().splitlines() if l.strip()}
+
+
+def load_verdicts() -> dict[tuple[str, str], bool]:
+    p = RUNS / "verdicts.jsonl"
+    out: dict[tuple[str, str], bool] = {}
+    if p.exists():
+        for l in p.read_text().splitlines():
+            if l.strip():
+                d = json.loads(l)
+                out[(d["instance_id"], d["arm"])] = d["resolved"]
+    return out
+
+
+# --- planning / driver ----------------------------------------------------------
+
+def load_plan() -> list[dict]:
+    sequences = [json.loads(l) for l in SEQUENCES.read_text().splitlines() if l.strip()]
+    inst_by_id = {json.loads(l)["instance_id"]: json.loads(l)
+                  for l in INSTANCES.read_text().splitlines() if l.strip()}
+    return sequences, inst_by_id
+
+
+def dry_run() -> None:
+    sequences, inst_by_id = load_plan()
+    n_tasks = 0
+    print(f"{'repo':40} {'k':>3}  {'instance':45} arms")
+    for seq in sequences:
+        repo = seq["repo"]
+        for k, iid in enumerate(seq["instance_ids"], 1):
+            present = "OK" if iid in inst_by_id else "MISSING"
+            print(f"{repo:40} {k:>3}  {iid:45} {','.join(ARMS)} [{present}]")
+            n_tasks += 1
+    total_runs = n_tasks * len(ARMS)
+    est_min = total_runs * 8
+    print()
+    print(f"repos: {len(sequences)}  tasks(instances): {n_tasks}  arms: {len(ARMS)}")
+    print(f"total agent runs (task x arm): {total_runs}")
+    print(f"estimated agent time @ 8 min/run: {est_min} min "
+          f"= {est_min/60:.1f} h = {est_min/60/24:.1f} days (scoring extra)")
+    longest = max(sequences, key=lambda s: s["n"])
+    print(f"longest sequence: {longest['repo']} ({longest['n']} tasks)")
+
+
+def main(argv: list[str] | None = None) -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--dry-run", action="store_true",
+                    help="print the (repo, k, instance, arm) schedule and exit")
+    ap.add_argument("--use-mined-corpus", action="store_true",
+                    help="retrieve from the mined git corpus instead of the "
+                         "agent-accumulated store (default: off)")
+    args = ap.parse_args(argv)
+
+    if args.dry_run:
+        dry_run()
+        return
+
+    RUNS.mkdir(parents=True, exist_ok=True)
+    sequences, inst_by_id = load_plan()
+    done_preds = {arm: load_done_predictions(arm) for arm in ARMS}
+    verdicts = load_verdicts()
+    n_tasks = sum(len(s["instance_ids"]) for s in sequences)
+    log(f"cross-session start: {len(sequences)} repos, {n_tasks} tasks x {len(ARMS)} arms"
+        f" (use_mined_corpus={args.use_mined_corpus})")
+
+    for seq in sequences:
+        repo = seq["repo"]
+        ids = seq["instance_ids"]
+        for k, iid in enumerate(ids, 1):
+            inst = inst_by_id[iid]
+            # 1. agents (each memory arm retrieves from its own accumulated store)
+            for arm in ARMS:
+                if iid in done_preds[arm]:
+                    continue
+                ensure_endpoints()
+                t0 = time.time()
+                run_agent(inst, arm, repo, k, args.use_mined_corpus)
+                done_preds[arm].add(iid)
+                log(f"[{repo} k={k}] agent {arm}/{iid} {time.time()-t0:.0f}s")
+            # 2. scoring (image cached across arms)
+            need = [a for a in ARMS if (iid, a) not in verdicts]
+            for arm in need:
+                t0 = time.time()
+                resolved = score(iid, arm)
+                verdicts[(iid, arm)] = resolved
+                with (RUNS / "verdicts.jsonl").open("a") as fh:
+                    fh.write(json.dumps({"instance_id": iid, "arm": arm, "repo": repo,
+                                         "k": k, "resolved": resolved}) + "\n")
+                log(f"[{repo} k={k}] score {arm}/{iid} -> {resolved} {time.time()-t0:.0f}s")
+            # 3. drop the image
+            if need:
+                subprocess.run([DOCKER_BIN, "container", "prune", "-f"], capture_output=True)
+                subprocess.run([DOCKER_BIN, "rmi", image_for(iid)], capture_output=True)
+            # 4. write memory for every arm (in order, idempotent) so task k+1 in
+            #    this repo sees tasks 1..k. Runs even for resumed/skipped tasks.
+            for arm in MEMORY_ARMS:
+                write_memory(arm, repo, inst, verdicts.get((iid, arm)))
+    log("CROSS-SESSION-COMPLETE")
+
+
+if __name__ == "__main__":
+    main()
