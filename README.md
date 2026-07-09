@@ -18,3 +18,7 @@ uv run --python 3.13 python -m membench run --config configs/example.toml --inst
 uv run --python 3.13 python -m membench eval --instances dataset/examples/instances.jsonl --predictions runs/demo/predictions.jsonl --output runs/demo/report.json
 uv run --python 3.13 python -m unittest discover -s tests
 ```
+
+## License
+
+MemBench is released under the [PolyForm Noncommercial License 1.0.0](LICENSE.md): free to use for scientific research and other noncommercial purposes; commercial use and selling are not permitted.
