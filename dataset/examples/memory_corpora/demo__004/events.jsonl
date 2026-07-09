@@ -1,0 +1,3 @@
+{"id": "event_301", "type": "pr_merged", "title": "Add serializer/errors.py", "body": "Initial error module.", "created_at": "2025-06-01T00:00:00Z"}
+{"id": "event_302", "type": "issue_closed", "title": "Money amounts corrupted as floats", "body": "Decision: Decimal -> str in JSON output.", "created_at": "2026-01-05T00:00:00Z"}
+{"id": "event_303", "type": "pr_merged", "title": "Refactor: rename errors.py to exceptions.py", "body": "serializer.errors is gone; SerializerError now lives in serializer.exceptions.", "created_at": "2026-02-10T00:00:00Z"}

@@ -1,0 +1,2 @@
+{"id":"doc_001","source":"docs","created_at":"2026-01-09T00:00:00Z","title":"Error handling guide","text":"Public calculator APIs should expose CalculatorError for arithmetic backend failures so callers do not depend on implementation-specific exception classes.","metadata":{"path":"docs/errors.md"}}
+

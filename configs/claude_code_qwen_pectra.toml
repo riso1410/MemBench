@@ -1,0 +1,32 @@
+[agent]
+backend = "claude_code"
+claude_cmd = "/home/students/xsleher/.local/bin/claude"
+claude_model = "qwen3-coder-30b"
+permission_mode = "bypassPermissions"
+
+# Route Claude Code at the vLLM server on pectra (Anthropic-compatible /v1/messages).
+[agent.env]
+ANTHROPIC_BASE_URL = "http://127.0.0.1:8000"
+ANTHROPIC_AUTH_TOKEN = "dummy"
+ANTHROPIC_MODEL = "qwen3-coder-30b"
+ANTHROPIC_SMALL_FAST_MODEL = "qwen3-coder-30b"
+CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = "1"
+# qwen3-coder-30b on pectra serves 65536 ctx; Claude Code's default 32k output blows it
+CLAUDE_CODE_MAX_OUTPUT_TOKENS = "8192"
+# Claude Code assumes 200k context for unknown models and never compacts;
+# declare the real window so auto-compact fires before the server 400s (65536 - 8192 output)
+CLAUDE_CODE_MAX_CONTEXT_TOKENS = "44000"
+# Isolate benchmark runs from the user's Claude Code environment: without this,
+# headless runs inherit user plugins/skills/task tools (TaskList spam, claude-mem
+# hooks) and auto-memory writes MEMORY.md into model patches.
+CLAUDE_CONFIG_DIR = "/home/students/xsleher/MemBench/.claude_bench_config"
+CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1"
+
+[memory]
+adapter = "none"
+top_k = 5
+max_memory_tokens = 2000
+
+[run]
+max_instances = 0
+include_retrieved_memory_in_output = true

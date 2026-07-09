@@ -1,0 +1,1 @@
+{"id": "event_201", "type": "issue_closed", "title": "Production outage: legacy configs silently ignored", "body": "Ops incident: old deployments send db_url/tmo. Decision: normalize via LEGACY_KEYS inside load(), do NOT require migration.", "created_at": "2026-02-20T00:00:00Z"}

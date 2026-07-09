@@ -1,0 +1,1 @@
+{"id": "doc_101", "title": "API error handling guide", "text": "Public functions never leak backend exception types. Wrap and chain with `raise <PublicError>(...) from exc`.", "created_at": "2026-01-10T00:00:00Z"}

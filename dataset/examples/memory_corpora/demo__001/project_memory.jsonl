@@ -1,0 +1,3 @@
+{"id":"pm_001","kind":"semantic","key":"Decimal error policy","value":"The calculator package wraps backend arithmetic exceptions in CalculatorError. Tests expect public APIs to raise CalculatorError, not ZeroDivisionError or decimal.DivisionByZero.","source":"project_memory","created_at":"2026-01-10T00:00:00Z","confidence":0.9,"evidence":["event_001"]}
+{"id":"pm_002","kind":"procedural","key":"Test command","value":"For Decimal arithmetic changes, run pytest tests/test_decimal.py before the full suite.","source":"project_memory","created_at":"2026-01-10T00:00:00Z","confidence":0.8,"evidence":["event_002"]}
+

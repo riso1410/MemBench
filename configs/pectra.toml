@@ -1,0 +1,19 @@
+[model]
+provider = "openai_compatible"
+model = "qwen3-coder-30b"
+base_url = "http://127.0.0.1:8000/v1"
+api_key_env = "OPENAI_API_KEY"
+input_cost_per_million_tokens = 0.0
+output_cost_per_million_tokens = 0.0
+temperature = 0.0
+max_output_tokens = 8192
+timeout_sec = 300
+
+[memory]
+adapter = "structured"
+top_k = 5
+max_memory_tokens = 2000
+
+[run]
+max_instances = 0
+include_retrieved_memory_in_output = true

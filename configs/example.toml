@@ -1,0 +1,23 @@
+[model]
+# Use "dry_run" until a model endpoint is available.
+provider = "dry_run"
+model = "dry-run"
+base_url = ""
+api_key_env = "OPENAI_API_KEY"
+timeout_sec = 120
+max_output_tokens = 4096
+temperature = 0.0
+input_cost_per_million_tokens = 0.0
+output_cost_per_million_tokens = 0.0
+
+[memory]
+# Options currently implemented: "none", "raw_rag", "structured".
+adapter = "structured"
+corpus_root = "dataset/examples/memory_corpora"
+top_k = 5
+max_memory_tokens = 2000
+
+[run]
+output_dir = "runs/default"
+max_instances = 0
+include_retrieved_memory_in_output = true

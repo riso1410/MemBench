@@ -1,0 +1,8 @@
+.uv-cache/
+.venv/
+__pycache__/
+*.pyc
+runs/
+dataset/swebench_live_full/
+dataset/swebench_live/
+.claude_bench_config/

@@ -1,0 +1,2 @@
+{"id": "pm_301", "kind": "semantic", "key": "Error types location (STALE)", "value": "Error classes live in serializer/errors.py; import SerializerError from serializer.errors.", "source": "project_memory", "created_at": "2025-06-01T00:00:00Z", "confidence": 0.6, "evidence": ["event_301"]}
+{"id": "pm_302", "kind": "semantic", "key": "Decimal JSON policy", "value": "Decimals are serialized as strings (exact representation), never floats.", "source": "project_memory", "created_at": "2026-01-05T00:00:00Z", "confidence": 0.9, "evidence": ["event_302"]}

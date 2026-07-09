@@ -1,0 +1,14 @@
+[agent]
+backend = "claude_code"
+claude_cmd = "claude"
+claude_model = ""
+permission_mode = "bypassPermissions"
+
+[memory]
+adapter = "none"
+top_k = 5
+max_memory_tokens = 2000
+
+[run]
+max_instances = 0
+include_retrieved_memory_in_output = true

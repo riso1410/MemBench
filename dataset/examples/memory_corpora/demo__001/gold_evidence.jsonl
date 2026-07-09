@@ -1,0 +1,3 @@
+{"id":"evidence_001","instance_id":"demo__001","memory_item_id":"pm_001","reason":"The target issue asks for Decimal division by zero to follow the same CalculatorError wrapping policy."}
+{"id":"evidence_002","instance_id":"demo__001","memory_item_id":"event_001","reason":"A prior bug used the same backend-exception wrapping pattern."}
+

@@ -1,0 +1,1 @@
+{"id": "doc_201", "title": "Config schema notes", "text": "Canonical keys: database_url, timeout_sec. Legacy aliases exist for pre-2025 deployments.", "created_at": "2026-02-15T00:00:00Z"}
