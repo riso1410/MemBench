@@ -313,20 +313,22 @@ def load_plan() -> list[dict]:
     return sequences, inst_by_id
 
 
-def dry_run() -> None:
+def dry_run(arms: list[str], repos: set[str] | None) -> None:
     sequences, inst_by_id = load_plan()
+    if repos is not None:
+        sequences = [s for s in sequences if s["repo"] in repos]
     n_tasks = 0
     print(f"{'repo':40} {'k':>3}  {'instance':45} arms")
     for seq in sequences:
         repo = seq["repo"]
         for k, iid in enumerate(seq["instance_ids"], 1):
             present = "OK" if iid in inst_by_id else "MISSING"
-            print(f"{repo:40} {k:>3}  {iid:45} {','.join(ARMS)} [{present}]")
+            print(f"{repo:40} {k:>3}  {iid:45} {','.join(arms)} [{present}]")
             n_tasks += 1
-    total_runs = n_tasks * len(ARMS)
+    total_runs = n_tasks * len(arms)
     est_min = total_runs * 8
     print()
-    print(f"repos: {len(sequences)}  tasks(instances): {n_tasks}  arms: {len(ARMS)}")
+    print(f"repos: {len(sequences)}  tasks(instances): {n_tasks}  arms: {len(arms)}")
     print(f"total agent runs (task x arm): {total_runs}")
     print(f"estimated agent time @ 8 min/run: {est_min} min "
           f"= {est_min/60:.1f} h = {est_min/60/24:.1f} days (scoring extra)")
@@ -341,18 +343,28 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--use-mined-corpus", action="store_true",
                     help="retrieve from the mined git corpus instead of the "
                          "agent-accumulated store (default: off)")
+    ap.add_argument("--arms", default=None,
+                    help="comma-separated subset of arms to run (default: all)")
+    ap.add_argument("--repos", default=None,
+                    help="comma-separated repo names to run (default: all)")
     args = ap.parse_args(argv)
 
+    arms = [a for a in ARMS if a in set(args.arms.split(","))] if args.arms else list(ARMS)
+    memory_arms = [a for a in arms if a != "none"]
+    repos = set(args.repos.split(",")) if args.repos else None
+
     if args.dry_run:
-        dry_run()
+        dry_run(arms, repos)
         return
 
     RUNS.mkdir(parents=True, exist_ok=True)
     sequences, inst_by_id = load_plan()
-    done_preds = {arm: load_done_predictions(arm) for arm in ARMS}
+    if repos is not None:
+        sequences = [s for s in sequences if s["repo"] in repos]
+    done_preds = {arm: load_done_predictions(arm) for arm in arms}
     verdicts = load_verdicts()
     n_tasks = sum(len(s["instance_ids"]) for s in sequences)
-    log(f"cross-session start: {len(sequences)} repos, {n_tasks} tasks x {len(ARMS)} arms"
+    log(f"cross-session start: {len(sequences)} repos, {n_tasks} tasks x {len(arms)} arms"
         f" (use_mined_corpus={args.use_mined_corpus})")
 
     for seq in sequences:
@@ -361,7 +373,7 @@ def main(argv: list[str] | None = None) -> None:
         for k, iid in enumerate(ids, 1):
             inst = inst_by_id[iid]
             # 1. agents (each memory arm retrieves from its own accumulated store)
-            for arm in ARMS:
+            for arm in arms:
                 if iid in done_preds[arm]:
                     continue
                 ensure_endpoints()
@@ -370,7 +382,7 @@ def main(argv: list[str] | None = None) -> None:
                 done_preds[arm].add(iid)
                 log(f"[{repo} k={k}] agent {arm}/{iid} {time.time()-t0:.0f}s")
             # 2. scoring (image cached across arms)
-            need = [a for a in ARMS if (iid, a) not in verdicts]
+            need = [a for a in arms if (iid, a) not in verdicts]
             for arm in need:
                 t0 = time.time()
                 resolved = score(iid, arm)
@@ -385,7 +397,7 @@ def main(argv: list[str] | None = None) -> None:
                 subprocess.run([DOCKER_BIN, "rmi", image_for(iid)], capture_output=True)
             # 4. write memory for every arm (in order, idempotent) so task k+1 in
             #    this repo sees tasks 1..k. Runs even for resumed/skipped tasks.
-            for arm in MEMORY_ARMS:
+            for arm in memory_arms:
                 write_memory(arm, repo, inst, verdicts.get((iid, arm)))
     log("CROSS-SESSION-COMPLETE")
 
