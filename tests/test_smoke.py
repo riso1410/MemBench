@@ -52,7 +52,7 @@ class WorkspaceScoringTests(unittest.TestCase):
         workspace = setup_workspace(instance, ROOT / "dataset/examples")
 
         before = score_workspace(workspace, instance)
-        self.assertFalse(before["resolved"])
+        self.assertFalse(before["resolved_local_unverified"])
         self.assertTrue(before["pass_to_pass"]["passed"])
 
         ops = workspace / "calculator" / "decimal_ops.py"
@@ -69,7 +69,7 @@ class WorkspaceScoringTests(unittest.TestCase):
         ops.write_text(fixed)
 
         after = score_workspace(workspace, instance)
-        self.assertTrue(after["resolved"])
+        self.assertTrue(after["resolved_local_unverified"])
 
 
 if __name__ == "__main__":

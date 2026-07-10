@@ -94,6 +94,7 @@ class Mem0Adapter:
         results = memory.search(query, filters={"user_id": "project"}, limit=self.top_k)
         rows = results.get("results", []) if isinstance(results, dict) else (results or [])
         rows = [{"memory": r} if isinstance(r, str) else r for r in rows]
+        rows = rows[: self.top_k]  # mem0 can return more than limit; enforce top_k uniformly
         items = [
             MemoryItem(
                 item_id=str(row.get("id", "")),

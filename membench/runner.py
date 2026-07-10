@@ -75,7 +75,7 @@ def run_benchmark(
         "wall_time_sec": round(time.time() - started_at, 3),
         "ok": sum(1 for row in predictions if row.get("status") == "ok"),
         "errors": sum(1 for row in predictions if row.get("status") == "error"),
-        "resolved": sum(1 for row in predictions if row.get("resolved") is True),
+        "resolved": sum(1 for row in predictions if row.get("resolved_local_unverified") is True),
     }
 
 
@@ -167,7 +167,7 @@ def _run_instance(
         "prediction": content,
         "usage": usage,
         "estimated_cost_usd": cost_usd,
-        "resolved": None,
+        "resolved_local_unverified": None,
         "wall_time_sec": round(time.time() - instance_started_at, 3),
     }
     if patch_applied is not None:
@@ -176,7 +176,7 @@ def _run_instance(
     if workspace is not None:
         restore_protected_paths(workspace, instance)
         scoring = score_workspace(workspace, instance)
-        prediction["resolved"] = scoring["resolved"]
+        prediction["resolved_local_unverified"] = scoring["resolved_local_unverified"]
         prediction["tests"] = scoring
         prediction["oracle_precheck"] = oracle_precheck
         prediction["model_patch"] = workspace_diff(workspace)

@@ -9,7 +9,7 @@
 \usepackage{caption}
 
 \title{Are Agent Memory Systems Worth It for Coding Agents?\\
-\large MemBench: A Contamination-Controlled Benchmark Pilot with Pinned Open-Weight Models}
+\large MemBench: A Benchmark-Harness Pilot with Pinned Open-Weight Models and Explicit Contamination Probes}
 \author{MemBench Project\thanks{Benchmark code, dataset, configurations, and full agent trajectories at the MemBench repository. Inference: Qwen3-Coder-30B (AWQ 4-bit) served by vLLM 0.24.0 on a single RTX 5090.}}
 \date{July 3, 2026}
 
@@ -17,7 +17,7 @@
 \maketitle
 
 \begin{abstract}
-Persistent memory systems for LLM coding agents are widely marketed but weakly evidenced: every prominent published comparison is vendor-produced, and the two head-to-head disputes on record (Zep vs.\ Mem0 on LoCoMo) show that configuration choices alone swing reported scores by more than 25 percentage points. We present \textbf{MemBench}, an executable, contamination-controlled benchmark harness for measuring whether agent memory earns its cost on coding tasks, and report a pilot study comparing \textbf{seven memory arms} --- no-memory, raw-history RAG, structured project memory, a claude-mem-style FTS5 pipeline, Mem0 OSS, Graphiti (FalkorDB), and graphify --- under a single agent scaffold (Claude Code) driven end-to-end by a \emph{pinned open-weight model} (Qwen3-Coder-30B via vLLM), with extraction and embedding for every memory system routed to the same local endpoints. On our five-task pilot suite, \emph{every arm resolved every task} (35/35, independently re-verified). The pilot's chief findings are methodological: (i) the agent scaffold dominates the model --- the same model scored 0/6 single-shot but 100\% agentic; (ii) un-isolated harnesses silently corrupt results --- before environment isolation, headless agents inherited user-level tools and auto-memory, token costs spread $2.4\times$ across arms, and the platform systems appeared most expensive; after isolation the spread collapsed to $1.36\times$ and the cost ranking \emph{inverted}, with Mem0 and graphify cheapest; and (iii) memory's first measurable effect is on agent \emph{behavior and cost}, not correctness. We release the harness, tasks, per-turn trajectories, and all failure modes as a foundation for the statistically powered evaluation the field currently lacks.
+Persistent memory systems for LLM coding agents are widely marketed but weakly evidenced: every prominent published comparison is vendor-produced, and the two head-to-head disputes on record (Zep vs.\ Mem0 on LoCoMo) show that configuration choices alone swing reported scores by more than 25 percentage points. We present \textbf{MemBench}, an executable benchmark harness --- with explicit contamination \emph{probes} rather than a contamination guarantee --- for measuring whether agent memory earns its cost on coding tasks, and report a pilot study comparing \textbf{seven memory arms}, presented by mechanism with the product that inspired each: no-memory, raw-history RAG, structured markdown memory (Cline-Memory-Bank/Cursor-rules style), FTS/BM25 observations (claude-mem-style), vector-extraction memory (Mem0 OSS), graph-edge memory (Graphiti/FalkorDB), and KG-query memory (graphify) --- under a single agent scaffold (Claude Code) driven end-to-end by a \emph{pinned open-weight model} (Qwen3-Coder-30B via vLLM), with extraction and embedding for every memory system routed to the same local endpoints. Because Qwen3-Coder-30B (July 2025) postdates SWE-bench-Live's April-2025 freshness window, we do not claim contamination control for this backbone; a memorization probe and date-split analysis are the mitigations we report instead. On our five-task pilot suite, \emph{every arm resolved every task} (35/35, independently re-verified). The pilot's chief findings are methodological: (i) the agent scaffold dominates the model --- the same model scored 0/6 single-shot but 100\% agentic; (ii) un-isolated harnesses silently corrupt results --- before environment isolation, headless agents inherited user-level tools and auto-memory, token costs spread $2.4\times$ across arms, and the platform systems appeared most expensive; after isolation the spread collapsed to $1.36\times$ and the cost ranking \emph{inverted}, with Mem0 and graphify cheapest; and (iii) memory's first measurable effect is on agent \emph{behavior and cost}, not correctness. We release the harness, tasks, per-turn trajectories, and all failure modes as a foundation for the statistically powered evaluation the field currently lacks.
 \end{abstract}
 
 \section{Introduction}
@@ -36,7 +36,7 @@ No coding-agent memory benchmark with executable oracles, contamination controls
 
 \textbf{Memory systems.} Mem0 (vector store with LLM fact extraction; the 2026 OSS release replaced the published two-phase pipeline with single-pass ADD-only extraction), Graphiti/Zep (bi-temporal knowledge graph, hybrid semantic+BM25+graph retrieval), Letta/MemGPT (self-edited memory blocks), Cognee (ECL knowledge-graph pipeline), claude-mem (Claude Code plugin: hook-captured observations in SQLite FTS5), graphify (repository knowledge graphs via tree-sitter + LLM semantic extraction), and Anthropic's native memory tool and auto-memory. Of these, only ReasoningBank-style distilled episodic memory has a measured lift on a repository-level coding benchmark (+4.6pp on SWE-bench Verified, with the contamination caveat above)~\cite{reasoningbank}.
 
-\textbf{Benchmarks.} LoCoMo and LongMemEval (conversational recall; LoCoMo demonstrably unreliable), MemoryAgentBench (four memory competencies; conversational), EvoMemBench (memory value shrinks as context windows grow), STALE (best frontier model detects invalidated memories only 55.2\% of the time), and SWE Context Bench (319 interdependent GitHub tasks; oracle summary reuse +8pp) --- the closest prior work to MemBench, but single-run and without cost accounting. For contamination-safe task sourcing we build on SWE-bench-Live (post-2024 issues, monthly refresh) and the SWE-bench harness pattern of Dockerized per-instance environments with fail-to-pass/pass-to-pass oracles~\cite{swebench-live}.
+\textbf{Benchmarks.} LoCoMo and LongMemEval (conversational recall; LoCoMo demonstrably unreliable), MemoryAgentBench (four memory competencies; conversational), EvoMemBench (memory value shrinks as context windows grow; its context-size curve bounds how much any memory arm can be worth under a large window), STALE (best frontier model detects invalidated memories only 55.2\% of the time), and SWE Context Bench (319 interdependent GitHub tasks; oracle summary reuse +8pp). The closest prior work is \textbf{SWE-Bench-CL}~\cite{swebenchcl}: chronological per-repo task sequences on SWE-bench Verified evaluated with a single fixed FAISS semantic-memory agent. MemBench differs by (i) a post-2024 SWE-bench-Live base rather than the contamination-exposed Verified set, (ii) seven standardized memory arms rather than one fixed memory implementation, (iii) an explicit carry-forward control, and (iv) per-arm cost accounting. Concurrent coding-memory work we position against includes Memory Transfer Learning across coding agents~\cite{memtransfer}, AgentCL~\cite{agentcl}, structurally aligned subtask-level memory~\cite{subtaskmem}, SlopCodeBench~\cite{slopcode}, BEAM~\cite{beam}, and the RL memory-policy class typified by Memory-R1~\cite{memoryr1}; the field-level framing follows the \emph{Memory in the Age of AI Agents} survey~\cite{memsurvey}. Two memory-mechanism classes our taxonomy adds are personalized-PageRank retrieval (HippoRAG / HippoRAG 2~\cite{hipporag,hipporag2}, which we flag as a planned neutral academic arm) and RL-learned memory policies (Memory-R1). For contamination-safe task sourcing we build on SWE-bench-Live (post-2024 issues, monthly refresh) and the SWE-bench harness pattern of Dockerized per-instance environments with fail-to-pass/pass-to-pass oracles~\cite{swebench-live}.
 
 \textbf{Measurement hazards.} Run-to-run pass@1 on SWE-bench-style evals varies 2.2--6.0pp across identical reruns --- the same order as typical memory effect sizes --- so single-run comparisons are uninterpretable~\cite{errorbars}. Our companion design document additionally identifies a \emph{carry-forward hazard} specific to memory evaluation: in 70\% of consecutive Django task pairs, the earlier task's fix is already present in the later task's base checkout, inflating naive ``memory lift''.
 
@@ -62,32 +62,33 @@ demo\_\_005 & M0 + distractors & Trivial off-by-one; corpus is all distractors \
 \end{center}
 
 \subsection{Memory arms}
+\label{subsec:arms}
 All arms share one scaffold --- Claude Code in headless mode --- and differ only in what the memory layer injects into the task prompt. Retrieved items are capped at 2{,}000 tokens.
 
 \begin{center}
 \small
 \begin{tabular}{llll}
 \toprule
-Arm & System & Storage / retrieval & Extraction LLM \\
+Arm & Mechanism (product inspiration) & Storage / retrieval & Extraction LLM \\
 \midrule
-none & --- & --- & --- \\
-raw\_rag & lexical RAG & corpus JSONL, lexical scoring & none \\
-structured & typed project memory & curated facts, lexical & none \\
-claude\_mem & claude-mem pipeline replica & SQLite FTS5, BM25 & none (corpus pre-structured) \\
-mem0 & Mem0 OSS 2.0.11 & Qdrant (local), vector & qwen3-coder-30b (vLLM provider) \\
-graphiti & Graphiti 0.29.x & FalkorDB temporal graph, hybrid & qwen3-coder-30b + qwen3-embedding \\
-graphify & graphify (safishamsi) & knowledge graph, BFS query & qwen3-coder-30b (OpenAI-compat) \\
+none & no memory & --- & --- \\
+raw\_rag & raw-history RAG & corpus JSONL, lexical scoring & none \\
+structured & structured markdown memory (Cline-Memory-Bank / Cursor-rules) & curated facts, lexical & none \\
+claude\_mem & FTS/BM25 observations (claude-mem-style) & SQLite FTS5, BM25 & none (corpus pre-structured) \\
+mem0 & vector-extraction memory (Mem0 OSS 2.0.11) & Qdrant (local), vector & qwen3-coder-30b (vLLM provider) \\
+graphiti & graph-edge memory (Graphiti 0.29.x) & FalkorDB temporal graph, hybrid & qwen3-coder-30b + qwen3-embedding \\
+graphify & KG-query memory (graphify) & knowledge graph, BFS query & qwen3-coder-30b (OpenAI-compat) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The claude-mem arm replicates the plugin's storage and search layer (FTS5, BM25 ranking) rather than running the shipped plugin: the installed release cannot re-point its extraction step at a local model, and running it against a commercial API would break the pinned-model control. Letta and Cognee are excluded from the pilot: Letta's Claude Code bridge requires its cloud service, and Cognee's documentation recommends larger extraction models than our pinned backbone.
+The claude-mem arm replicates the plugin's storage and search layer (FTS5, BM25 ranking) rather than running the shipped plugin: the installed release cannot re-point its extraction step at a local model, and running it against a commercial API would break the pinned-model control. Letta and Cognee are excluded from the pilot: Letta's Claude Code bridge requires its cloud service, and Cognee's documentation recommends larger extraction models than our pinned backbone. Crucially, the product arms (Mem0, Graphiti, claude-mem) run in a \emph{standardized corpus-ingestion mode}: the driver hands each system the same time-split corpus and calls its retrieval interface, but the products' native incremental write and consolidation pipelines --- the mechanisms that would run during live deployment --- do not execute. These arms therefore measure \emph{retrieval mechanisms over a driver-authored store}, not the products as deployed. One consequence is a cost artifact: arms that re-ingest the growing corpus per task incur an $O(k^2)$ re-ingestion overhead across a $k$-task sequence that a live incremental store would not pay; reported cost numbers for the caching arms include this artifact.
 
 \subsection{Pinned open-weight stack}
 Reproducibility requires that no arm silently depends on a commercial API. The agent, and the extraction/embedding calls of every memory system, run against two local endpoints: Qwen3-Coder-30B-A3B-Instruct (AWQ 4-bit) and Qwen3-Embedding-0.6B, both served by vLLM 0.24.0 on one RTX 5090 (32\,GB). vLLM's native Anthropic-compatible \texttt{/v1/messages} endpoint lets Claude Code drive the open-weight model directly; tool calling requires \texttt{--enable-auto-tool-choice --tool-call-parser qwen3\_coder}.
 
 \subsection{Metrics}
-Per instance and arm: resolution (executable oracle only --- no LLM judges), wall time, API turns, per-tool call counts (from full stream-JSON trajectories), total tokens, retrieved memory items, and memory-store construction time. Cost for the pinned stack is electricity; token counts are the portable cost signal.
+Per instance and arm: resolution (executable oracle only --- no LLM judges), wall time, API turns, per-tool call counts (from full stream-JSON trajectories), total tokens, retrieved memory items, and memory-store construction time. Cost for the pinned stack is electricity; token counts are the portable cost signal. Beyond the pilot's saturated single-cell counts, the harness now (concurrently implemented) reports a $k{\geq}2$ headline resolution split (memory value is only testable once a repo sequence has history to carry), paired significance via McNemar on discordant pairs and paired bootstrap CIs, a \texttt{citation\_rate}/memory-utilization signal parsed from trajectories (did the agent actually read injected memory?), an injected-token covariate per arm (to separate ``more context'' from ``better memory''), a date-split by issue creation month, and stratification by carry-forward status and offline memory-need label. A memorization probe (patch requested with no repo access) is reported per instance. We state status honestly: resolution, cost, turn, tool-count, and construction-time metrics are implemented and reported in this pilot; the $k{\geq}2$ split, McNemar/bootstrap CIs, citation-rate parsing, injected-token covariate, date-split, carry-forward/memory-need stratification, and memorization probe are implemented for the funded next step but not exercised on the five-task pilot suite, which lacks the repo history and cell counts to populate them.
 
 \section{Harness Findings: What Silently Corrupts Memory Benchmarks}
 \label{sec:harness}
@@ -148,13 +149,26 @@ The pilot cannot answer the headline question --- its tasks are too easy (the no
   \item \textbf{A fair platform comparison on pinned open weights is feasible} --- all four integrated systems ran extraction and embedding on local endpoints --- but only after fixing failure modes that vendor-run evaluations have no incentive to report (Section~\ref{sec:harness}).
 \end{itemize}
 
+\section{Threats to Validity}
+\label{sec:threats}
+
+\paragraph{Contamination (construct/internal).} Qwen3-Coder-30B was released in July 2025 and therefore postdates SWE-bench-Live's April-2025 freshness window; the instance issues we draw from (roughly 2024-10 through 2025-03) plausibly lie inside its training data. We consequently make \emph{no} ``contamination-controlled'' claim for this backbone. The mitigations we report instead are a memorization probe (request the patch with no repository access, per the arXiv:2506.12286 method) and a date-split analysis; a truly contamination-safe run requires a model whose cutoff precedes the task window, or post-cutoff instances relative to the chosen model.
+
+\paragraph{Repository scope (external).} The eval covers 6 of 39 eligible repositories, all Python, selected for fast Docker evaluation. Aggregate numbers can therefore hide per-repo structure, so per-repo reporting is mandatory. Sequence-depth claims are especially thin: results at depth $k{\geq}8$ rest on at most three repositories, and $k{\geq}12$ on a single haystack repository. Depth-conditioned conclusions should be read as suggestive, not established.
+
+\paragraph{Harness tuning as an upper-bound regime (external).} The 64k-window harness is tuned for memory to look good: a compact context window, a 400-line read cap, and tool-output trimming, tuned on the briefcase and haystack repositories, which are 41\% of the eval set. Under a large context window memory has less to add (EvoMemBench's context-size curve, cited above), so our results should be read as an \emph{upper-bound regime} for memory value rather than a neutral operating point.
+
+\paragraph{Sequence construction (construct).} Task sequences are chronological, not interdependence-mined; we do not claim each later task genuinely depends on an earlier one. To keep ``memory lift'' from being inflated by answers already sitting in the repository, carry-forward status and memory-need labels are computed offline and used to stratify the analysis, rather than assumed.
+
+\paragraph{Products are not measured as deployed (construct).} As noted in Section~\ref{subsec:arms}, the product arms (Mem0, Graphiti, claude-mem) run in standardized corpus-ingestion mode; their native incremental write and consolidation pipelines do not execute. These arms measure retrieval mechanisms over a driver-authored store, and the cost figures for caching arms include an $O(k^2)$ re-ingestion artifact that a live incremental store would not incur. A verdict of ``product X is/is not worth it'' from these arms is a statement about its retrieval layer, not its shipped write/consolidation behavior.
+
 \section{Limitations and Next Steps}
 Five synthetic tasks, one seed, one ordering, one model, no memory-write evaluation, and a corpus small enough that construction-time differences (milliseconds to minutes) do not yet bind. The funded next step is the designed pilot: 100--150 SWE-bench-Live-derived tasks in dependency-mined sequences with carry-forward annotation, 4--5 seeds $\times$ 3 orderings, paired McNemar and clustered-bootstrap analysis, stale/distractor/poison splits, and the decision rule pre-registered in the design document: if simple structured memory is within noise of the platforms, the recommendation is files and grep.
 
 \section*{Reproducibility}
 All configurations, task templates, memory corpora, adapter implementations, run outputs, and full per-turn trajectories (stream-JSON, including every tool call) accompany the repository. The serving stack is two pinned open-weight checkpoints on one consumer GPU; total pilot cost was local electricity.
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 \bibitem{swebench-audit} OpenAI. \emph{Why we no longer evaluate SWE-bench Verified}. Feb 23, 2026.
 \bibitem{locomo-audit} Mem0 vs.\ Zep LoCoMo dispute: corrected evaluation, GitHub issue thread, May 2025; Zep, \emph{Lies, Damn Lies, \& Statistics}, 2025.
 \bibitem{letta-fs} Letta. \emph{Benchmarking AI agent memory: is a filesystem all you need?} 2025.
@@ -164,6 +178,16 @@ All configurations, task templates, memory corpora, adapter implementations, run
 \bibitem{errorbars} Miller et al. \emph{Adding Error Bars to Evals}. arXiv:2411.00640.
 \bibitem{stale} \emph{STALE: Testing memory invalidation}. arXiv:2605.06527.
 \bibitem{swectx} \emph{SWE Context Bench}. arXiv:2602.08316.
+\bibitem{swebenchcl} \emph{SWE-Bench-CL: Continual Learning for Coding Agents}. arXiv:2507.00014.
+\bibitem{memtransfer} \emph{Memory Transfer Learning across Coding Agents}. arXiv:2604.14004.
+\bibitem{agentcl} \emph{AgentCL: Continual Learning for LLM Agents}. arXiv:2606.02461.
+\bibitem{subtaskmem} \emph{Structurally Aligned Subtask-Level Memory}. arXiv:2602.21611.
+\bibitem{slopcode} \emph{SlopCodeBench}. arXiv:2603.24755.
+\bibitem{beam} \emph{BEAM: Benchmarking memory for agents}.
+\bibitem{hipporag} \emph{HippoRAG: Neurobiologically Inspired Long-Term Memory for LLMs}. arXiv:2405.14831.
+\bibitem{hipporag2} \emph{HippoRAG 2}. arXiv:2502.14802.
+\bibitem{memoryr1} \emph{Memory-R1: Learning Memory Policies with RL}. arXiv:2508.19828.
+\bibitem{memsurvey} \emph{Memory in the Age of AI Agents}. arXiv:2512.13564.
 \end{thebibliography}
 
 \end{document}

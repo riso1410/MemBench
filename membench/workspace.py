@@ -89,8 +89,10 @@ def score_workspace(workspace: Path, instance: dict[str, Any]) -> dict[str, Any]
     # empty id list, so a bool verdict here is a false positive (94/140 disagreed
     # with docker). Emit None so nobody mistakes it for a real verdict.
     resolved = None if not f2p_ids else bool(f2p["passed"] and p2p["passed"])
+    # Non-authoritative: local pytest, no Docker/oracle isolation. Named
+    # *_unverified so no reader mistakes it for the official Docker verdict.
     return {
-        "resolved": resolved,
+        "resolved_local_unverified": resolved,
         "fail_to_pass": f2p,
         "pass_to_pass": p2p,
     }

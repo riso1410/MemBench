@@ -90,7 +90,10 @@ class GraphitiAdapter:
             self.construction_time_sec = round(time.time() - started, 3)
 
             safe_query = re.sub(r"[^\w\s]", " ", query)  # RediSearch chokes on raw issue text
-            results = await graphiti.search(safe_query, num_results=self.top_k)
+            # Graph facts are tiny (~10-30 tokens each), so top_k of them barely
+            # fills the memory budget while text arms saturate it. Over-fetch 5x
+            # and let the shared token limiter below bind the budget for parity.
+            results = await graphiti.search(safe_query, num_results=self.top_k * 5)
             items = [
                 MemoryItem(
                     item_id=str(edge.uuid),

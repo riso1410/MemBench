@@ -31,8 +31,8 @@ def evaluate_predictions(
         sum(float(row.get("estimated_cost_usd", 0.0)) for row in ok_predictions),
         8,
     )
-    scored = [row for row in ok_predictions if row.get("resolved") is not None]
-    resolved_count = sum(1 for row in scored if row.get("resolved") is True)
+    scored = [row for row in ok_predictions if row.get("resolved_local_unverified") is not None]
+    resolved_count = sum(1 for row in scored if row.get("resolved_local_unverified") is True)
     wall_times = [float(row.get("wall_time_sec", 0.0)) for row in ok_predictions]
     report: dict[str, Any] = {
         "instances": len(instances),

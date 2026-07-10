@@ -5,9 +5,9 @@ from typing import Any
 
 from ..jsonl import read_jsonl
 from ..schema import memory_corpus_path
-from ..token_count import estimate_tokens
 from .base import MemoryItem
 from .scoring import lexical_score
+from .structured import _limit_tokens
 
 
 class RawRagMemoryAdapter:
@@ -57,16 +57,4 @@ def _row_text(row: dict[str, Any]) -> str:
         if value:
             parts.append(str(value))
     return "\n".join(parts)
-
-
-def _limit_tokens(items: list[MemoryItem], max_tokens: int) -> list[MemoryItem]:
-    selected: list[MemoryItem] = []
-    used = 0
-    for item in items:
-        cost = estimate_tokens(item.text)
-        if selected and used + cost > max_tokens:
-            break
-        selected.append(item)
-        used += cost
-    return selected
 

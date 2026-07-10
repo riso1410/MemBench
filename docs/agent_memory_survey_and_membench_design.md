@@ -45,6 +45,8 @@ For MemBench, "memory" means persistent state outside the current task prompt th
 | Procedural memory | Team preferences, review rules, commit style, migration playbooks | Consistency across tasks. |
 | Entity/graph memory | Module ownership, dependency edges, issue-to-PR-to-file relations | Only where relationships matter; expensive to build (Graphiti requires structured-output-capable models and warns against small models). |
 | Raw transcript memory | Full previous conversations and logs | Empirically dominated: SWE Context Bench found full trajectories (24,765 words avg) underperform compact summaries (205 words avg). |
+| Retrieval / PPR memory | Personalized-PageRank over an entity graph (HippoRAG / HippoRAG 2) | Multi-hop associative recall without a graph-DB dependency; planned as a neutral academic arm (arXiv 2405.14831 / 2502.14802). |
+| RL-policy memory | Learned write/retrieve/forget policy (Memory-R1) | Treats memory management as a control problem rather than a fixed heuristic; the emerging RL-memory class (arXiv 2508.19828). |
 
 ## Current Evidence: What We Now Know
 
@@ -91,7 +93,8 @@ Consequence for memory research: on a contaminated benchmark, "memory lift" is c
 | **SWE-rebench** | 21,000+ Python tasks, continuous automated collection with contamination monitoring | Bulk task source and freshness pipeline model. |
 | **SWE-smith** | 50,137 synthetic instances, 128 repos, $1,360 total generation cost, 295 GB (vs SWE-bench's ~50-150 TB), ~20 human-hours | The economics template for *generating* memory-dependent task sequences cheaply. Combine-Bugs strategy validates at 96.9%. |
 | **SWE-Gym** | 2,438 real Python training instances + released trajectories (ICML 2025) | Source of prior-trajectory data for building episodic memory corpora. |
-| **SWE Context Bench** | 319 interdependent task instances from 1,100 base tasks, 51 repos | Closest existing benchmark to MemBench's goal; reuse its dependency-mining method (multi-issue PRs, cross-references). |
+| **SWE Context Bench** | 319 interdependent task instances from 1,100 base tasks, 51 repos | Reuse its dependency-mining method (multi-issue PRs, cross-references). |
+| **SWE-Bench-CL** (arXiv 2507.00014) | Chronological per-repo task sequences on SWE-bench Verified, evaluated with a single fixed FAISS semantic-memory agent | **Closest prior work to MemBench.** Differentiate via: Live post-2024 base (not the contamination-exposed Verified set), 7 standardized memory arms (not one fixed memory agent), an explicit carry-forward control, and per-arm cost accounting. |
 | Multi-stage benchmarks (FeatureBench, SWE-EVO, EvoCode-Bench, SWE-CI) | 100-200 tasks each; multi-commit feature chains, spec drift, 71-commit evolution windows | Design references for long-horizon memory stress; too expensive to adopt wholesale. |
 
 ### Memory benchmarks (for method, not tasks)
@@ -104,7 +107,9 @@ Consequence for memory research: on a contaminated benchmark, "memory lift" is c
 | τ-bench | pass^k reliability metric | Domain is retail/airline agents. |
 | STALE | Memory-invalidation testing methodology | Personal-state domain. |
 
-Conclusion unchanged but sharpened: **no coding-agent memory benchmark with executable oracles, contamination controls, and statistical power exists.** SWE Context Bench is closest but single-run and without cost accounting. That is the gap MemBench fills.
+Conclusion unchanged but sharpened: **no coding-agent memory benchmark with executable oracles, contamination controls, and statistical power exists.** The closest prior work is **SWE-Bench-CL** (arXiv 2507.00014) — chronological per-repo sequences on SWE-bench Verified with a single fixed FAISS memory agent; it lacks a Live post-2024 base, standardized memory arms, a carry-forward control, and cost accounting. SWE Context Bench is the next closest but single-run and without cost accounting. That is the gap MemBench fills.
+
+Concurrent and adjacent work to position against (2026): **Memory Transfer Learning across coding agents** (arXiv 2604.14004), **AgentCL** (arXiv 2606.02461, continual learning for LLM agents — also the source of the ordering-variance figure used in the statistical design), **Structurally Aligned Subtask-Level Memory** (arXiv 2602.21611), **SlopCodeBench** (arXiv 2603.24755), **BEAM** (agent-memory benchmark), the **RL memory-policy** class typified by **Memory-R1** (arXiv 2508.19828), and the field-level framing in **Memory in the Age of AI Agents** (survey, arXiv 2512.13564). **HippoRAG / HippoRAG 2** (arXiv 2405.14831 / 2502.14802) supply a personalized-PageRank retrieval mechanism we flag as a planned neutral academic arm.
 
 ## Proposed MemBench Task Definition
 
@@ -212,10 +217,12 @@ Same agent scaffold (mini-SWE-agent recommended: ~100 lines, bash-only, no tool-
 | `A1_long_context_history` | Relevant history stuffed into context within budget. | EvoMemBench says this is the toughest baseline to beat. |
 | `A2_repo_rag` | BM25/vector retrieval over current repo only. | Separates repo search from longitudinal memory. |
 | `A3_filesystem_memory` | Plain files + grep/search tools (Letta-baseline style). | The simple-tools champion; likely the practical winner. |
-| `A4_structured_project_memory` | Curated typed facts/lessons, lexical retrieval. | Recommended practical baseline. |
-| `A5_reasoningbank_episodic` | Distilled strategy items from prior success+failure trajectories. | The only approach with measured coding-task lift. |
+| `A4_structured_project_memory` | Structured markdown memory: curated typed facts/lessons, lexical retrieval. Instantiates the **Cline-Memory-Bank / Cursor-rules** markdown pattern practitioners already use. | Recommended practical baseline. |
+| `A5_reasoningbank_episodic` | Distilled strategy items from prior success+failure trajectories (ReasoningBank-style). | The only approach with measured coding-task lift. |
 | `A6_hybrid` | A4 + A5 + repo retrieval. | Expected pragmatic best. |
-| `A7_product_memory` | Mem0 OSS / Letta / Cognee / Graphiti under identical constraints. | Tests platform claims neutrally. |
+| `A7_product_memory` | Vector-extraction memory (Mem0 OSS), graph-edge memory (Graphiti), FTS/BM25 observations (claude-mem-style), and where pinnable Letta/Cognee, under identical constraints. | Tests platform claims neutrally — but in standardized corpus-ingestion mode (see caveat below), so it measures each product's *retrieval mechanism*, not its shipped write/consolidation pipeline. |
+| `A8_ppr_retrieval` (planned) | Personalized-PageRank retrieval over an entity graph (HippoRAG / HippoRAG 2). | Neutral academic arm; multi-hop recall without a graph-DB dependency. |
+| `A9_rl_policy` (planned) | RL-learned write/retrieve/forget policy (Memory-R1-style). | Tests whether a learned memory policy beats fixed heuristics. |
 
 Memory **writes** are benchmarked, not just reads: post-task proposed writes are scored by later-task utility and audited for noise (write precision was hypothesized — and MemoryAgentBench construction-cost data confirms — to be a first-order bottleneck).
 
@@ -232,6 +239,8 @@ Known confounds to control:
 - **Backbone structured-output capability changes rankings**: memory-extraction format-error rates go from 1.2% (gpt-4o-mini) to 30.4% (Qwen-2.5-3B). Graphiti explicitly warns against small models; Mem0 has 5+ open issues on empty memories with local models; Cognee silently falls back to OpenAI if a component is unconfigured. All arms must use the same backbone, verified to support JSON mode.
 - **Nondeterminism must be disabled**: Mem0 `async_mode` (default true since v1.0.0), Letta sleep-time agents, Graphiti async ingestion.
 - **Four unfair-comparison classes to refuse**: claude-mem vs OSS systems; Zep-cloud vs Graphiti-OSS; Mem0-platform vs Mem0-OSS; any comparison across backbones with different JSON-mode reliability.
+
+**Standardized corpus-ingestion caveat (what the product arms actually measure).** In the harness the product arms (Mem0, Graphiti, claude-mem) run in a *standardized corpus-ingestion mode*: the driver hands each system the same time-split corpus and calls its retrieval interface, but the products' native *incremental write and consolidation pipelines* — the mechanisms that run during live deployment — do not execute. These arms therefore measure **retrieval mechanisms over a driver-authored store, not the products as deployed**. Two consequences: (1) a "product X is/is not worth it" verdict from these arms is about its retrieval layer, not its shipped write/consolidation behavior; (2) arms that re-ingest a growing corpus per task incur an **O(k²) re-ingestion cost artifact** across a k-task sequence that a live incremental store would not pay — reported costs for the caching arms include this artifact.
 
 ## Metrics
 
@@ -269,6 +278,22 @@ net_value = quality_lift - λ_cost·extra_cost - λ_latency·extra_latency - λ_
 
 Report Pareto frontiers. A system gaining 2pp at 5x cost loses to one gaining 1pp at 1.1x.
 
+### Harness status: implemented vs planned (honest accounting)
+
+The metrics above are the target set. As of this revision the harness (being extended concurrently with these docs) reports the following, and the pilot must not over-claim beyond it:
+
+| Metric / analysis | Status | Notes |
+| --- | --- | --- |
+| `resolved`, wall time, turns, per-tool counts, tokens, retrieved-item count, construction time | **Implemented, reported** | Populated on every run. |
+| `k≥2` headline resolution split | **Implemented, not yet exercised** | Memory value is only testable once a per-repo sequence has history; the 5-task pilot has no depth to populate it. |
+| McNemar on discordant pairs + paired bootstrap CIs | **Implemented, not yet exercised** | Needs >1 seed/cell; pilot is n=1. |
+| `citation_rate` / memory-utilization (parsed from trajectories: did the agent read injected memory?) | **Implemented** | New parser over stream-JSON. |
+| Injected-token covariate per arm | **Implemented** | Separates "more context" from "better memory". |
+| Date-split (by issue creation month) | **Implemented** | Contamination diagnostic (see below). |
+| Carry-forward and memory-need stratification | **Implemented (offline labels)** | Labels computed offline, then used to stratify. |
+| Memorization probe (patch requested with no repo access) | **Implemented, reported per instance** | arXiv 2506.12286 method. |
+| `harm_rate`, `pass^k`, `poison_susceptibility`, `stale_memory_failure_rate`, write-quality metrics | **Planned** | Require the multi-seed / adversarial-split next step. |
+
 ## Reproducibility Design
 
 SWE-bench harness pattern: Dockerized per-instance environments, immutable snapshots, fail-to-pass/pass-to-pass oracles, JSONL predictions, re-runnable evaluation containers, public logs.
@@ -296,6 +321,8 @@ Model tiers:
 | Long-context frontier model | Memory-vs-context frontier | EvoMemBench curve replication on code. |
 
 Anti-contamination: post-training-cutoff issues only (SWE-bench-Live rule: post-Jan-2024), time-split memory corpora, dataset-generation code published (not just JSON), canary tasks from private forks, memorization probes (ask the model for the patch with no repo access — arXiv 2506.12286 method) reported per instance.
+
+**Caveat on the pinned backbone (do not over-claim contamination control).** Contamination-safety is a property of the *task-vs-model* pairing, not of the harness. Qwen3-Coder-30B (released July 2025) postdates SWE-bench-Live's April-2025 freshness window, so the instances we draw (roughly 2024-10..2025-03) plausibly lie inside its training data. We therefore make **no "contamination-controlled" claim for this backbone**; the memorization probe and date-split analysis are the reported mitigations. A genuinely contamination-safe run needs a model whose cutoff precedes the task window, or post-cutoff instances relative to whatever model is used.
 
 ## Security and Staleness Splits (new)
 

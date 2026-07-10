@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import time
@@ -10,6 +11,8 @@ from ..jsonl import read_jsonl
 from ..schema import memory_corpus_path
 from .base import MemoryItem
 from .mem0_adapter import _store_key
+from .scoring import lexical_score
+from .structured import _limit_tokens
 
 LLM_BASE_URL = "http://127.0.0.1:8000/v1"
 LLM_MODEL = "qwen3-coder-30b"
@@ -98,16 +101,67 @@ class GraphifyAdapter:
             capture_output=True, text=True, timeout=120,
         )
         answer = result.stdout.strip()
-        if result.returncode != 0 or not answer:
+        items: list[MemoryItem] = []
+        if result.returncode == 0 and answer:
+            items.append(
+                MemoryItem(
+                    item_id=f"graphify:{corpus_dir.name}",
+                    text=answer,
+                    source="graphify",
+                    score=1.0,
+                    metadata={"construction_time_sec": self.construction_time_sec},
+                )
+            )
+        # The single BFS answer is tiny (~150 tokens) versus the text arms that
+        # saturate the 2000-token budget. Append relevant node/edge summaries from
+        # the graph and let the shared token limiter bind the budget, so graphify's
+        # injection is comparable in volume to the other arms.
+        items.extend(self._graph_summaries(graph_path, query, corpus_dir.name))
+        return _limit_tokens(items, self.max_memory_tokens)
+
+    def _graph_summaries(self, graph_path: Path, query: str, corpus_name: str) -> list[MemoryItem]:
+        try:
+            graph = json.loads(graph_path.read_text())
+        except (OSError, ValueError):
             return []
+        id_to_label = {
+            str(n.get("id")): str(n.get("label") or n.get("name") or n.get("id"))
+            for n in graph.get("nodes", []) if isinstance(n, dict) and "id" in n
+        }
+        summaries: list[str] = []
+        for n in graph.get("nodes", []):
+            if isinstance(n, dict) and "id" in n:
+                label = id_to_label.get(str(n["id"]), "")
+                src_file = str(n.get("source_file") or "")
+                if label:
+                    summaries.append(f"{label} — {src_file}".strip(" —") if src_file else label)
+        # NetworkX <=3.1 serialises edges under "links"; graphify writes either.
+        for e in graph.get("edges", []) or graph.get("links", []):
+            if not isinstance(e, dict):
+                continue
+            src = id_to_label.get(str(e.get("source")), str(e.get("source", "")))
+            tgt = id_to_label.get(str(e.get("target")), str(e.get("target", "")))
+            rel = str(e.get("relation") or e.get("type") or "related to")
+            if src and tgt:
+                summaries.append(f"{src} --{rel}--> {tgt}")
+        # The whole graph is already scoped to this repo's prior tasks, so rank
+        # summaries by query relevance (best first) but keep them all — the shared
+        # token limiter binds the budget, so a small graph injects fully and a large
+        # one fills up to the same budget the text arms use. No score>0 gate: graph
+        # labels are terse (CamelCase), so lexical overlap is often 0 yet relevant.
+        scored = sorted(
+            ((lexical_score(query, s), s) for s in dict.fromkeys(summaries)),
+            key=lambda p: p[0], reverse=True,
+        )
         return [
             MemoryItem(
-                item_id=f"graphify:{corpus_dir.name}",
-                text=answer,
-                source="graphify",
-                score=1.0,
+                item_id=f"graphify:{corpus_name}:g{i}",
+                text=text,
+                source="graphify_graph",
+                score=float(score),
                 metadata={"construction_time_sec": self.construction_time_sec},
             )
+            for i, (score, text) in enumerate(scored)
         ]
 
     def write(self, instance: dict[str, Any], record: dict[str, Any]) -> None:

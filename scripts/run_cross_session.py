@@ -209,20 +209,22 @@ def _mem_file(arm: str) -> str:
     return "project_memory.jsonl" if arm == "structured" else "documents.jsonl"
 
 
-def _record_text(inst: dict, pred: dict | None, resolved) -> str:
+def _record_text(inst: dict, pred: dict | None) -> str:
+    # No Docker verdict here: a deployed agent writing its own memory never has
+    # the official resolved label, so leaking it would give retrieval an oracle
+    # signal no real deployment carries. Keep only issue title, notes, and patch.
     issue = inst.get("issue", {})
     title = str(issue.get("title", ""))
     patch = str((pred or {}).get("model_patch") or "")
     final = str((pred or {}).get("prediction") or "")
     return (
         f"Issue: {title}\n"
-        f"Outcome: resolved={resolved}\n"
         f"Agent notes:\n{final[:1200]}\n"
         f"Patch:\n{patch[:3000]}"
     )
 
 
-def write_memory(arm: str, repo: str, inst: dict, resolved) -> None:
+def write_memory(arm: str, repo: str, inst: dict) -> None:
     """Append one agent-written memory record for the just-finished task.
 
     Idempotent (keyed by cs_<iid>) so resumed runs rebuild the store in order
@@ -240,7 +242,14 @@ def write_memory(arm: str, repo: str, inst: dict, resolved) -> None:
             if l.strip() and json.loads(l).get("id") == mid:
                 return  # already recorded
     pred = _load_prediction(iid, arm)
-    text = _record_text(inst, pred, resolved)
+    # Don't pollute the store with thin/error rows: an errored (or missing)
+    # prediction row, or one with neither a patch nor analysis text, is not a
+    # usable memory. A real analysis with no patch is still kept.
+    patch = str((pred or {}).get("model_patch") or "")
+    final = str((pred or {}).get("prediction") or "")
+    if pred is None or pred.get("status") != "ok" or (not patch.strip() and not final.strip()):
+        return
+    text = _record_text(inst, pred)
     created_at = str(inst.get("issue", {}).get("created_at", ""))
     if arm == "structured":
         row = {
@@ -406,8 +415,9 @@ def main(argv: list[str] | None = None) -> None:
         for k, iid in enumerate(ids, 1):
             inst = inst_by_id[iid]
             # 1. agents (each memory arm retrieves from its own accumulated store).
-            #    Shuffle arm order deterministically per (seed, iid): the fixed
-            #    none-first order is a confound (audit).
+            #    Shuffle arm order deterministically per (seed, iid). Arms are
+            #    causally independent, so this is NOT a confound control; it just
+            #    spreads machine-load / cache-warmth noise evenly across arms.
             arms_order = list(arms)
             random.Random(f"{args.seed}:{iid}").shuffle(arms_order)
             for arm in arms_order:
@@ -435,7 +445,7 @@ def main(argv: list[str] | None = None) -> None:
             # 4. write memory for every arm (in order, idempotent) so task k+1 in
             #    this repo sees tasks 1..k. Runs even for resumed/skipped tasks.
             for arm in memory_arms:
-                write_memory(arm, repo, inst, verdicts.get((iid, arm)))
+                write_memory(arm, repo, inst)
     log("CROSS-SESSION-COMPLETE")
 
 
