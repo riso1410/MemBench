@@ -29,7 +29,7 @@ fi
 run_phase(){ # $1=prefix $2=config
   for s in 1 2 3; do
     root="runs/cs_${1}_seed$s"; mkdir -p "$root"
-    tmux new-session -d -s "mb-${1}$s" "cd $HOME/MemBench && MEMBENCH_CONFIG=$2 python3 scripts/run_cross_session.py --seed $s --out-root $root --repos '$REPOS' > $root/driver.log 2>&1"
+    tmux new-session -d -s "mb-${1}$s" "cd $HOME/MemBench && env PATH=$PATH MEMBENCH_ROOT=$MEMBENCH_ROOT SWB_ROOT=$SWB_ROOT DOCKER_BIN=$DOCKER_BIN DOCKER_HOST=$DOCKER_HOST MEM0_TELEMETRY=false MEMBENCH_CONFIG=$2 python3 scripts/run_cross_session.py --seed $s --out-root $root --repos '$REPOS' > $root/driver.log 2>&1"
     log "launched mb-${1}$s -> $root"
   done
   while :; do

@@ -15,11 +15,19 @@ def setup_workspace(instance: dict[str, Any], instances_dir: Path) -> Path:
     template = (instances_dir / str(spec["template_dir"])).resolve()
     if not template.is_dir():
         raise ValueError(f"workspace template not found: {template}")
+    if not (template / ".template_readonly").exists():
+        raise ValueError(
+            f"template integrity guard: missing .template_readonly sentinel in {template} "
+            "(templates must be read-only; run restore/guard tooling to (re)create them)"
+        )
     base = Path(os.environ.get("MEMBENCH_ROOT", Path(__file__).resolve().parent.parent)) / "runs" / "workspaces"
     base.mkdir(parents=True, exist_ok=True)
     workdir = Path(tempfile.mkdtemp(prefix=f"membench_{instance['instance_id']}_", dir=base))
     workspace = workdir / "repo"
     shutil.copytree(template, workspace)
+    # templates are read-only (pollution guard); copytree preserves modes, so make
+    # the disposable workspace writable for the agent before git init.
+    subprocess.run(["chmod", "-R", "u+w", str(workspace)], check=True)
     _git(workspace, "init", "-q")
     _git(workspace, "add", "-A")
     _git(
