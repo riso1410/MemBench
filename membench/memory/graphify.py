@@ -9,6 +9,7 @@ from typing import Any
 from ..jsonl import read_jsonl
 from ..schema import memory_corpus_path
 from .base import MemoryItem
+from .mem0_adapter import _store_key
 
 LLM_BASE_URL = "http://127.0.0.1:8000/v1"
 LLM_MODEL = "qwen3-coder-30b"
@@ -31,11 +32,17 @@ class GraphifyAdapter:
         self.construction_time_sec: float = 0.0
 
     def _graph_for(self, corpus_dir: Path) -> Path | None:
-        work_dir = Path("runs/.graphify_stores") / corpus_dir.name
+        # Store OUTSIDE the repo: graphify extract honours .gitignore, so a store
+        # under runs/ (gitignored) has every doc skipped ("found 0 docs") -> empty
+        # graph -> failure. ~/.membench is outside the repo and carries no
+        # .gitignore, so the rendered corpus is actually ingested (and it is not
+        # /tmp, so benchmark artifacts are not scattered there). Keyed by _store_key.
+        work_dir = Path.home() / ".membench" / "graphify_stores" / _store_key(corpus_dir)
         graph_path = work_dir / "graphify-out" / "graph.json"
         if graph_path.exists():
             return graph_path
         work_dir.mkdir(parents=True, exist_ok=True)
+        n_records = 0
         for name, title_key, body_key in (
             ("project_memory.jsonl", "key", "value"),
             ("events.jsonl", "title", "body"),
@@ -50,7 +57,12 @@ class GraphifyAdapter:
                 body = str(row.get(body_key, row.get("content", "")))
                 created = str(row.get("created_at", ""))
                 lines.append(f"## {title}\n({created})\n\n{body}\n")
+                n_records += 1
             (work_dir / f"{name.removesuffix('.jsonl')}.md").write_text("\n".join(lines))
+        if n_records == 0:
+            # Empty store (e.g. first task in a sequence): no memory yet. Return
+            # no graph so retrieval yields nothing; construction_time stays 0.
+            return None
         env = {
             **os.environ,
             "OPENAI_BASE_URL": LLM_BASE_URL,
@@ -64,9 +76,10 @@ class GraphifyAdapter:
         )
         self.construction_time_sec = round(time.time() - started, 3)
         if result.returncode != 0 or not graph_path.exists():
-            raise RuntimeError(
-                f"graphify extract failed ({result.returncode}): {result.stderr[-500:]}"
-            )
+            # Nothing extractable (e.g. terse records produced an empty graph).
+            # Degrade to "no memory" instead of failing the whole task, so one
+            # thin snapshot cannot cascade-fail the sequence.
+            return None
         return graph_path
 
     def retrieve(self, instance: dict[str, Any], query: str) -> list[MemoryItem]:
@@ -74,6 +87,8 @@ class GraphifyAdapter:
         if not corpus_dir.exists():
             return []
         graph_path = self._graph_for(corpus_dir)
+        if graph_path is None:
+            return []
         result = subprocess.run(
             [
                 "graphify", "query", query,

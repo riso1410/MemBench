@@ -45,6 +45,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
+import re
 import shutil
 import subprocess
 import sys
@@ -99,16 +101,33 @@ def image_for(iid: str) -> str:
     return f"starryzhang/sweb.eval.x86_64.{iid.replace('__', '_1776_')}:latest"
 
 
+_LITTER_MD = re.compile(r"(SUMMARY|CHANGES|FIX_|IMPLEMENTATION|SOLUTION|NOTES?).*\.md$", re.I)
+
+
+def _skip_block(block: list[str]) -> bool:
+    head = block[0]
+    if "__pycache__" in head or head.rstrip().endswith(".pyc"):
+        return True
+    # Only litter-filter NEW files; never touch modified files or new source files.
+    if not any(b.startswith("new file mode") for b in block):
+        return False
+    path = head.rstrip().split(" b/", 1)[-1]  # 'diff --git a/x b/x' -> 'x'
+    name = path.rsplit("/", 1)[-1]
+    # ponytail: litter heuristic -- *.bak; SUMMARY/CHANGES/FIX_/IMPLEMENTATION/
+    # SOLUTION/NOTES*.md; or a repo-root README.md introduced as a new file.
+    return name.endswith(".bak") or bool(_LITTER_MD.search(name)) or path == "README.md"
+
+
 def strip_patch(patch: str) -> str:
-    keep, block, skip = [], [], False
+    keep, block = [], []
     for l in patch.splitlines(keepends=True):
         if l.startswith("diff --git"):
-            if block and not skip:
+            if block and not _skip_block(block):
                 keep += block
-            block, skip = [l], ("__pycache__" in l or l.rstrip().endswith(".pyc"))
+            block = [l]
         else:
             block.append(l)
-    if block and not skip:
+    if block and not _skip_block(block):
         keep += block
     return "".join(keep)
 
@@ -347,7 +366,21 @@ def main(argv: list[str] | None = None) -> None:
                     help="comma-separated subset of arms to run (default: all)")
     ap.add_argument("--repos", default=None,
                     help="comma-separated repo names to run (default: all)")
+    ap.add_argument("--seed", type=int, default=0,
+                    help="RNG seed for per-task arm order; N>0 also selects "
+                         "runs/cross_session_seed{N} (N==0 keeps runs/cross_session)")
+    ap.add_argument("--out-root", default=None,
+                    help="override the runs root entirely (e.g. runs/cs_claude_seed1); "
+                         "takes precedence over --seed. Absolute or MEMBENCH_ROOT-relative")
     args = ap.parse_args(argv)
+
+    global RUNS
+    if args.out_root:
+        RUNS = Path(args.out_root)
+        if not RUNS.is_absolute():
+            RUNS = MB / args.out_root
+    elif args.seed:
+        RUNS = MB / f"runs/cross_session_seed{args.seed}"
 
     arms = [a for a in ARMS if a in set(args.arms.split(","))] if args.arms else list(ARMS)
     memory_arms = [a for a in arms if a != "none"]
@@ -372,8 +405,12 @@ def main(argv: list[str] | None = None) -> None:
         ids = seq["instance_ids"]
         for k, iid in enumerate(ids, 1):
             inst = inst_by_id[iid]
-            # 1. agents (each memory arm retrieves from its own accumulated store)
-            for arm in arms:
+            # 1. agents (each memory arm retrieves from its own accumulated store).
+            #    Shuffle arm order deterministically per (seed, iid): the fixed
+            #    none-first order is a confound (audit).
+            arms_order = list(arms)
+            random.Random(f"{args.seed}:{iid}").shuffle(arms_order)
+            for arm in arms_order:
                 if iid in done_preds[arm]:
                     continue
                 ensure_endpoints()

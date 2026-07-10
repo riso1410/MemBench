@@ -23,7 +23,7 @@ Retrieved memory from previous work on this project:
 {memory}
 
 Rules:
-- Edit source files in place. Do not modify anything under tests/.
+- Edit source files in place. Do not modify existing tests or add files under the repository's test directories.
 - Do not commit. Leave your changes in the working tree.
 - Use retrieved memory only when relevant and not stale. If memory influenced the fix, state which memory item ids you used."""
 
@@ -49,7 +49,9 @@ def run_claude_code(
         "--permission-mode", agent_config.permission_mode,
         # headless mode never auto-compacts; unbounded runs 400 at the 65k model
         # context after ~70 turns. Successful demo runs take 8-16 turns.
-        "--max-turns", "30",
+        "--max-turns", "60",
+        # ponytail: strip unneeded tool schemas; 23-tool baseline was ~19k tokens on a 64k model
+        "--disallowedTools", "Task,CronCreate,CronDelete,CronList,EnterWorktree,ExitWorktree,NotebookEdit,ScheduleWakeup,SendMessage,Skill,TaskCreate,TaskGet,TaskList,TaskOutput,TaskStop,TaskUpdate,WebFetch,WebSearch,Workflow,DesignSync",
     ]
     if agent_config.claude_model:
         cmd += ["--model", agent_config.claude_model]

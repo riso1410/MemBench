@@ -1,0 +1,20 @@
+[agent]
+backend = "opencode"
+opencode_cmd = "/home/students/xsleher/.opencode/bin/opencode"
+# provider/model — provider "local" is declared in configs/opencode.json
+opencode_model = "local/qwen3-coder-30b"
+
+# Route OpenCode at the local vLLM server. The OpenAI-compatible baseURL and the
+# (dummy) api key live in the provider config json, not in env; point OpenCode at
+# that repo-tracked config so it resolves regardless of the (ephemeral) workspace cwd.
+[agent.env]
+OPENCODE_CONFIG = "/home/students/xsleher/MemBench/configs/opencode.json"
+
+[memory]
+adapter = "none"
+top_k = 5
+max_memory_tokens = 2000
+
+[run]
+max_instances = 0
+include_retrieved_memory_in_output = true

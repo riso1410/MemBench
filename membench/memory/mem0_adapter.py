@@ -40,7 +40,7 @@ class Mem0Adapter:
         os.environ.setdefault("MEM0_TELEMETRY", "false")
         from mem0 import Memory
 
-        store_dir = Path("runs/.mem0_stores") / corpus_dir.name
+        store_dir = Path("runs/.mem0_stores") / _store_key(corpus_dir)
         config = {
             "llm": {
                 "provider": "vllm",
@@ -109,6 +109,12 @@ class Mem0Adapter:
 
     def write(self, instance: dict[str, Any], record: dict[str, Any]) -> None:
         return None
+
+
+def _store_key(corpus_dir: Path) -> str:
+    # scope store dir by absolute path so reruns/arms/repos never share vectors/graphs
+    import hashlib
+    return f"{corpus_dir.name}__{hashlib.sha1(str(corpus_dir.resolve()).encode()).hexdigest()[:10]}"
 
 
 def _corpus_texts(corpus_dir: Path) -> list[tuple[str, str]]:

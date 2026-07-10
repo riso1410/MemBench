@@ -6,6 +6,7 @@ from typing import Any
 
 from .agent import CodingAgent, build_query
 from .claude_code import run_claude_code
+from .opencode import run_opencode
 from .config import MemBenchConfig
 from .jsonl import write_jsonl
 from .memory import build_memory_adapter
@@ -39,7 +40,11 @@ def run_benchmark(
         instances = instances[:max_instances]
 
     memory = build_memory_adapter(config.memory)
-    model = build_model(config.model) if config.agent.backend != "claude_code" else None
+    model = (
+        build_model(config.model)
+        if config.agent.backend not in ("claude_code", "opencode")
+        else None
+    )
 
     predictions: list[dict[str, Any]] = []
     started_at = time.time()
@@ -117,6 +122,27 @@ def _run_instance(
             "trajectory_path": cc["trajectory_path"],
             "subtype": cc.get("subtype", ""),
             "is_error": cc.get("is_error", False),
+        }
+    elif config.agent.backend == "opencode":
+        if workspace is None:
+            raise ValueError("opencode backend requires instance.workspace")
+        trajectory_path = (
+            trajectory_dir / f"{instance['instance_id']}.jsonl" if trajectory_dir else None
+        )
+        oc = run_opencode(
+            instance, memory_items, workspace, config.agent, trajectory_path=trajectory_path
+        )
+        content = oc["content"]
+        usage = oc["usage"]
+        cost_usd = oc["cost_usd"]
+        agent_info = {
+            "backend": "opencode",
+            "model": config.agent.opencode_model or "default",
+            "num_turns": oc["num_turns"],
+            "duration_ms": oc["duration_ms"],
+            "tool_calls": oc["tool_calls"],
+            "trajectory_path": oc["trajectory_path"],
+            "is_error": oc.get("is_error", False),
         }
     else:
         agent = CodingAgent(model)

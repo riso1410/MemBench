@@ -29,9 +29,11 @@ class MemoryConfig:
 
 @dataclass(frozen=True)
 class AgentConfig:
-    backend: str = "single_shot"  # or "claude_code"
+    backend: str = "single_shot"  # or "claude_code" or "opencode"
     claude_cmd: str = "claude"
     claude_model: str = ""
+    opencode_cmd: str = "opencode"
+    opencode_model: str = ""  # opencode model id, "provider/model" form
     permission_mode: str = "bypassPermissions"
     env: dict[str, str] = field(default_factory=dict)  # extra env for the claude process (e.g. ANTHROPIC_BASE_URL)
 
@@ -102,6 +104,8 @@ def config_from_dict(raw: dict[str, Any]) -> MemBenchConfig:
         backend=str(agent_raw.get("backend", AgentConfig.backend)),
         claude_cmd=str(agent_raw.get("claude_cmd", AgentConfig.claude_cmd)),
         claude_model=str(agent_raw.get("claude_model", AgentConfig.claude_model)),
+        opencode_cmd=str(agent_raw.get("opencode_cmd", AgentConfig.opencode_cmd)),
+        opencode_model=str(agent_raw.get("opencode_model", AgentConfig.opencode_model)),
         permission_mode=str(agent_raw.get("permission_mode", AgentConfig.permission_mode)),
         env={str(k): str(v) for k, v in dict(agent_raw.get("env", {})).items()},
     )

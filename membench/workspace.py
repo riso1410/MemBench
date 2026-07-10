@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
@@ -14,7 +15,9 @@ def setup_workspace(instance: dict[str, Any], instances_dir: Path) -> Path:
     template = (instances_dir / str(spec["template_dir"])).resolve()
     if not template.is_dir():
         raise ValueError(f"workspace template not found: {template}")
-    workdir = Path(tempfile.mkdtemp(prefix=f"membench_{instance['instance_id']}_"))
+    base = Path(os.environ.get("MEMBENCH_ROOT", Path(__file__).resolve().parent.parent)) / "runs" / "workspaces"
+    base.mkdir(parents=True, exist_ok=True)
+    workdir = Path(tempfile.mkdtemp(prefix=f"membench_{instance['instance_id']}_", dir=base))
     workspace = workdir / "repo"
     shutil.copytree(template, workspace)
     _git(workspace, "init", "-q")
@@ -37,6 +40,11 @@ def restore_protected_paths(workspace: Path, instance: dict[str, Any]) -> None:
     protected = instance.get("workspace", {}).get("protected_paths", ["tests"])
     for path in protected:
         _git(workspace, "checkout", "HEAD", "--", str(path))
+        # checkout only reverts TRACKED files; agent-CREATED untracked files under
+        # a protected path survive and leak into the model_patch. Delete them too.
+        # (direct subprocess, no check -> keep ignore-errors semantics)
+        subprocess.run(["git", "clean", "-fd", "--", str(path)],
+                       cwd=workspace, capture_output=True, text=True)
 
 
 def apply_patch(workspace: Path, patch: str) -> bool:
@@ -73,10 +81,16 @@ def run_tests(workspace: Path, test_ids: list[str], timeout_sec: int = 600) -> d
 
 def score_workspace(workspace: Path, instance: dict[str, Any]) -> dict[str, Any]:
     oracle = instance.get("oracle", {})
-    f2p = run_tests(workspace, list(oracle.get("fail_to_pass", [])))
-    p2p = run_tests(workspace, list(oracle.get("pass_to_pass", [])))
+    f2p_ids = list(oracle.get("fail_to_pass", []))
+    p2p_ids = list(oracle.get("pass_to_pass", []))
+    f2p = run_tests(workspace, f2p_ids)
+    p2p = run_tests(workspace, p2p_ids)
+    # No fail_to_pass oracle => no ground truth. run_tests trivially "passes" on an
+    # empty id list, so a bool verdict here is a false positive (94/140 disagreed
+    # with docker). Emit None so nobody mistakes it for a real verdict.
+    resolved = None if not f2p_ids else bool(f2p["passed"] and p2p["passed"])
     return {
-        "resolved": bool(f2p["passed"] and p2p["passed"]),
+        "resolved": resolved,
         "fail_to_pass": f2p,
         "pass_to_pass": p2p,
     }

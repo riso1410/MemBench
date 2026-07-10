@@ -10,7 +10,7 @@ from typing import Any
 from ..jsonl import read_jsonl
 from ..schema import memory_corpus_path
 from .base import MemoryItem
-from .mem0_adapter import LLM_BASE_URL, EMBED_BASE_URL, _corpus_texts
+from .mem0_adapter import LLM_BASE_URL, EMBED_BASE_URL, _corpus_texts, _store_key
 from .structured import _limit_tokens
 
 
@@ -48,7 +48,7 @@ class GraphitiAdapter:
             FalkorDriver.sanitize = lambda self, q, _o=_orig: re.sub(r"[^0-9A-Za-z_\s]", " ", _o(self, q))
             FalkorDriver._mb_sanitize_patched = True
 
-        store_dir = Path("runs/.graphiti_stores") / corpus_dir.name
+        store_dir = Path("runs/.graphiti_stores") / _store_key(corpus_dir)
         store_dir.mkdir(parents=True, exist_ok=True)
         ingested_marker = store_dir / ".ingested"
 
@@ -61,7 +61,7 @@ class GraphitiAdapter:
         # Kuzu backend is deprecated in graphiti-core and creates no FTS indexes;
         # FalkorDB (docker: membench-falkordb on :6379) is graphiti's supported default.
         graphiti = Graphiti(
-            graph_driver=FalkorDriver(host="localhost", port=6379, database=corpus_dir.name),
+            graph_driver=FalkorDriver(host="localhost", port=6379, database=_store_key(corpus_dir)),
             llm_client=OpenAIGenericClient(config=llm_config),
             embedder=OpenAIEmbedder(
                 config=OpenAIEmbedderConfig(
