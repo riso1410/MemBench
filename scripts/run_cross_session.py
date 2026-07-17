@@ -51,6 +51,7 @@ import shutil
 import subprocess
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 MB = Path(os.environ.get("MEMBENCH_ROOT", Path(__file__).resolve().parent.parent))
@@ -68,6 +69,7 @@ INSTANCES = DATASET_DIR / "instances.jsonl"
 ORIG_DATASET = MB / "dataset/swebench_live_full"
 RUNS = MB / "runs/cross_session"
 AGENT_TIMEOUT = 2400
+ARM_CONC = int(os.environ.get("MEMBENCH_ARM_CONCURRENCY", "4"))
 EVAL_TIMEOUT = 3600
 
 CORPUS_FILES = ("documents.jsonl", "project_memory.jsonl", "events.jsonl")
@@ -420,14 +422,20 @@ def main(argv: list[str] | None = None) -> None:
             #    spreads machine-load / cache-warmth noise evenly across arms.
             arms_order = list(arms)
             random.Random(f"{args.seed}:{iid}").shuffle(arms_order)
-            for arm in arms_order:
-                if iid in done_preds[arm]:
-                    continue
+            todo = [a for a in arms_order if iid not in done_preds[a]]
+            if todo:
                 ensure_endpoints()
-                t0 = time.time()
-                run_agent(inst, arm, repo, k, args.use_mined_corpus)
-                done_preds[arm].add(iid)
-                log(f"[{repo} k={k}] agent {arm}/{iid} {time.time()-t0:.0f}s")
+                # ponytail: run arms concurrently so vLLM batches them and the GPU
+                # stays fed during generation; arms are causally independent. Cap via
+                # MEMBENCH_ARM_CONCURRENCY (default 4) to bound KV-cache pressure.
+                def _run_arm(arm):
+                    t0 = time.time()
+                    run_agent(inst, arm, repo, k, args.use_mined_corpus)
+                    log(f"[{repo} k={k}] agent {arm}/{iid} {time.time()-t0:.0f}s")
+                with ThreadPoolExecutor(max_workers=min(ARM_CONC, len(todo))) as ex:
+                    list(ex.map(_run_arm, todo))
+                for arm in todo:
+                    done_preds[arm].add(iid)
             # 2. scoring (image cached across arms)
             need = [a for a in arms if (iid, a) not in verdicts]
             for arm in need:
