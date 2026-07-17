@@ -297,8 +297,14 @@ def run_agent(inst: dict, arm: str, repo: str, k: int, use_mined: bool) -> None:
     cmd = ["uv", "run", "--python", "3.13", "python", "-m", "membench", "run",
            "--config", CONFIG, "--instances", str(tmp_inst),
            "--output", str(tmp_pred), "--adapter", arm]
+    # ponytail: isolate OpenCode's shared SQLite db per arm so concurrent arms
+    # don't hit "database is locked"; harmless for agents that ignore XDG_DATA_HOME.
+    oc_data = RUNS / ".opencode_data" / arm
+    oc_data.mkdir(parents=True, exist_ok=True)
+    agent_env = {**os.environ, "XDG_DATA_HOME": str(oc_data)}
     try:
-        r = subprocess.run(cmd, cwd=MB, capture_output=True, text=True, timeout=AGENT_TIMEOUT)
+        r = subprocess.run(cmd, cwd=MB, capture_output=True, text=True,
+                           timeout=AGENT_TIMEOUT, env=agent_env)
         line = tmp_pred.read_text().strip() if tmp_pred.exists() else ""
         if not line:
             line = json.dumps({"instance_id": iid, "status": "error",
