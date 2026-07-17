@@ -20,7 +20,12 @@ def setup_workspace(instance: dict[str, Any], instances_dir: Path) -> Path:
             f"template integrity guard: missing .template_readonly sentinel in {template} "
             "(templates must be read-only; run restore/guard tooling to (re)create them)"
         )
-    base = Path(os.environ.get("MEMBENCH_ROOT", Path(__file__).resolve().parent.parent)) / "runs" / "workspaces"
+    # ponytail: workspace base is env-overridable so the opencode backend can run
+    # OUTSIDE the repo tree -- opencode walks up to the outer .git and would
+    # otherwise escape into the read-only dataset/ template copies. Default keeps
+    # the original runs/workspaces path (claude backend unchanged).
+    _default_base = Path(os.environ.get("MEMBENCH_ROOT", Path(__file__).resolve().parent.parent)) / "runs" / "workspaces"
+    base = Path(os.environ.get("MEMBENCH_WORKSPACE_DIR", str(_default_base)))
     base.mkdir(parents=True, exist_ok=True)
     workdir = Path(tempfile.mkdtemp(prefix=f"membench_{instance['instance_id']}_", dir=base))
     workspace = workdir / "repo"
