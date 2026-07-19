@@ -106,7 +106,8 @@ def _run_instance(
             trajectory_dir / f"{instance['instance_id']}.jsonl" if trajectory_dir else None
         )
         cc = run_claude_code(
-            instance, memory_items, workspace, config.agent, trajectory_path=trajectory_path
+            instance, memory_items, workspace, config.agent,
+            trajectory_path=trajectory_path, adapter=config.memory.adapter,
         )
         content = cc["content"]
         usage = cc["usage"]

@@ -28,12 +28,37 @@ Rules:
 - Use retrieved memory only when relevant and not stale. If memory influenced the fix, state which memory item ids you used."""
 
 
+# Per-arm system-prompt appendix (opt-in via MEMBENCH_ARM_SYSTEM_PROMPTS=1).
+# Cross-session-memory ablation: memory is otherwise only *passively* injected in
+# the user prompt and the agent tends to ignore it (~98% of tokens are it reading
+# source files). These appendices explicitly direct the agent to LEAN ON the
+# retrieved memory. The `none` baseline gets no appendix (it has no memory).
+_MEM_CORE = (
+    "This task is part of a CROSS-SESSION MEMORY experiment. Your prompt contains "
+    "RETRIEVED MEMORY accumulated from your own prior work on THIS repository. Before "
+    "exploring the codebase from scratch, FIRST read that memory and let it steer you: "
+    "which files to open, which fix pattern worked before, and which pitfalls (e.g. "
+    "tests that previously broke) to avoid. Recall and reuse prior solutions rather "
+    "than rediscovering them; cite the memory item ids you relied on."
+)
+ARM_SYSTEM_PROMPTS = {
+    "none": "",
+    "raw_rag": _MEM_CORE + " The memory is retrieved text snippets from past sessions.",
+    "structured": _MEM_CORE + " The memory is a structured record of prior task outcomes (issue -> fix -> affected files).",
+    "claude_mem": _MEM_CORE + " The memory is notes distilled from your prior Claude sessions on this repo.",
+    "mem0": _MEM_CORE + " The memory comes from a mem0 long-term store; treat it as durable memory of how similar issues were resolved.",
+    "graphiti": _MEM_CORE + " The memory comes from a temporal knowledge graph; use entity/relationship links to locate the right code and prior changes.",
+    "graphify": _MEM_CORE + " The memory comes from a knowledge-graph summary; use it to orient on structure and prior fixes quickly.",
+}
+
+
 def run_claude_code(
     instance: dict[str, Any],
     memory_items: list[MemoryItem],
     workspace: Path,
     agent_config: AgentConfig,
     trajectory_path: Path | None = None,
+    adapter: str = "none",
 ) -> dict[str, Any]:
     issue = instance.get("issue", {})
     prompt = PROMPT_TEMPLATE.format(
@@ -55,6 +80,11 @@ def run_claude_code(
     ]
     if agent_config.claude_model:
         cmd += ["--model", agent_config.claude_model]
+    # opt-in per-arm system-prompt appendix (cross-session-memory usage ablation)
+    if os.environ.get("MEMBENCH_ARM_SYSTEM_PROMPTS") == "1":
+        _extra = ARM_SYSTEM_PROMPTS.get(adapter, "")
+        if _extra:
+            cmd += ["--append-system-prompt", _extra]
     timeout = int(instance.get("budgets", {}).get("max_wall_time_sec", 1800))
     env = {**os.environ, **agent_config.env} if agent_config.env else None
     result = subprocess.run(
