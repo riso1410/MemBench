@@ -211,7 +211,7 @@ def _mem_file(arm: str) -> str:
     return "project_memory.jsonl" if arm == "structured" else "documents.jsonl"
 
 
-def _record_text(inst: dict, pred: dict | None) -> str:
+def _record_text(inst: dict, pred: dict | None, resolved: bool | None = None) -> str:
     # No Docker verdict here: a deployed agent writing its own memory never has
     # the official resolved label, so leaking it would give retrieval an oracle
     # signal no real deployment carries. Keep only issue title, notes, and patch.
@@ -219,14 +219,27 @@ def _record_text(inst: dict, pred: dict | None) -> str:
     title = str(issue.get("title", ""))
     patch = str((pred or {}).get("model_patch") or "")
     final = str((pred or {}).get("prediction") or "")
+    # opt-in: label records with their outcome so a prior FAILED attempt is
+    # recallable as a NEGATIVE example instead of looking like a good fix. Uses
+    # the scored verdict (an oracle label) -> only for the "learn-from-failure"
+    # research condition, gated behind MEMBENCH_MEMORY_LABEL_OUTCOME=1.
+    outcome = ""
+    if os.environ.get("MEMBENCH_MEMORY_LABEL_OUTCOME") == "1" and resolved is not None:
+        outcome = (
+            "Outcome: RESOLVED (this patch fixed the issue and passed tests)\n"
+            if resolved else
+            "Outcome: FAILED (this patch did NOT resolve the issue / broke tests -- "
+            "recall it to avoid repeating this approach, do not copy it)\n"
+        )
     return (
         f"Issue: {title}\n"
+        f"{outcome}"
         f"Agent notes:\n{final[:1200]}\n"
         f"Patch:\n{patch[:3000]}"
     )
 
 
-def write_memory(arm: str, repo: str, inst: dict) -> None:
+def write_memory(arm: str, repo: str, inst: dict, resolved: bool | None = None) -> None:
     """Append one agent-written memory record for the just-finished task.
 
     Idempotent (keyed by cs_<iid>) so resumed runs rebuild the store in order
@@ -251,7 +264,7 @@ def write_memory(arm: str, repo: str, inst: dict) -> None:
     final = str((pred or {}).get("prediction") or "")
     if pred is None or pred.get("status") != "ok" or (not patch.strip() and not final.strip()):
         return
-    text = _record_text(inst, pred)
+    text = _record_text(inst, pred, resolved)
     created_at = str(inst.get("issue", {}).get("created_at", ""))
     if arm == "structured":
         row = {
@@ -459,7 +472,7 @@ def main(argv: list[str] | None = None) -> None:
             # 4. write memory for every arm (in order, idempotent) so task k+1 in
             #    this repo sees tasks 1..k. Runs even for resumed/skipped tasks.
             for arm in memory_arms:
-                write_memory(arm, repo, inst)
+                write_memory(arm, repo, inst, verdicts.get((iid, arm)))
     log("CROSS-SESSION-COMPLETE")
 
 

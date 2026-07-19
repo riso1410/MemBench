@@ -39,7 +39,10 @@ _MEM_CORE = (
     "exploring the codebase from scratch, FIRST read that memory and let it steer you: "
     "which files to open, which fix pattern worked before, and which pitfalls (e.g. "
     "tests that previously broke) to avoid. Recall and reuse prior solutions rather "
-    "than rediscovering them; cite the memory item ids you relied on."
+    "than rediscovering them; cite the memory item ids you relied on. Some records "
+    "may be labeled 'Outcome: FAILED' -- those are prior attempts that did NOT work "
+    "(they broke tests or missed the fix); recall them as negative examples to avoid "
+    "repeating that approach, not to copy."
 )
 ARM_SYSTEM_PROMPTS = {
     "none": "",
