@@ -1,0 +1,1399 @@
+{
+ "aws-cloudformation__cfn-lint-3798": [
+  "src/cfnlint/jsonschema/_keywords.py",
+  "src/cfnlint/rules/functions/_BaseFn.py"
+ ],
+ "reflex-dev__reflex-4129": [
+  "reflex/istate/dynamic.py",
+  "reflex/state.py",
+  "reflex/utils/types.py"
+ ],
+ "deepset-ai__haystack-8489": [
+  "haystack/core/pipeline/pipeline.py",
+  "haystack/tracing/datadog.py",
+  "haystack/tracing/logging_tracer.py",
+  "haystack/tracing/opentelemetry.py",
+  "haystack/tracing/tracer.py",
+  "releasenotes/notes/tracing-with-concurrency-5daadfde0a36f94a.yaml"
+ ],
+ "pytorch__torchtune-1806": [
+  "torchtune/models/gemma/_tokenizer.py",
+  "torchtune/models/mistral/_tokenizer.py",
+  "torchtune/models/phi3/_tokenizer.py",
+  "torchtune/models/qwen2/_tokenizer.py"
+ ],
+ "aws-cloudformation__cfn-lint-3767": [
+  "src/cfnlint/data/schemas/other/iam/policy.json"
+ ],
+ "python-babel__babel-1141": [
+  "babel/dates.py"
+ ],
+ "pvlib__pvlib-python-2249": [
+  "docs/sphinx/source/whatsnew/v0.11.2.rst",
+  "pvlib/spa.py"
+ ],
+ "projectmesa__mesa-2394": [
+  "mesa/agent.py",
+  "mesa/model.py"
+ ],
+ "pydata__xarray-9586": [
+  "xarray/core/dtypes.py"
+ ],
+ "keras-team__keras-20389": [
+  "keras/src/models/functional.py"
+ ],
+ "conan-io__conan-17123": [
+  "conan/internal/api/config/config_installer.py"
+ ],
+ "projectmesa__mesa-2418": [
+  "mesa/experimental/cell_space/discrete_space.py",
+  "mesa/space.py"
+ ],
+ "aws-cloudformation__cfn-lint-3770": [
+  "src/cfnlint/rules/resources/stepfunctions/StateMachineDefinition.py"
+ ],
+ "instructlab__instructlab-2540": [
+  "CHANGELOG.md",
+  "README.md",
+  "docs/index.rst",
+  "src/instructlab/configuration.py",
+  "src/instructlab/model/chat.py",
+  "src/instructlab/profiles/apple/m1/m1_max.yaml",
+  "src/instructlab/profiles/apple/m1/m1_ultra.yaml",
+  "src/instructlab/profiles/apple/m2/m2.yaml",
+  "src/instructlab/profiles/apple/m2/m2_max.yaml",
+  "src/instructlab/profiles/apple/m2/m2_pro.yaml",
+  "src/instructlab/profiles/apple/m2/m2_ultra.yaml",
+  "src/instructlab/profiles/apple/m3/m3.yaml",
+  "src/instructlab/profiles/apple/m3/m3_max.yaml",
+  "src/instructlab/profiles/apple/m3/m3_pro.yaml",
+  "src/instructlab/profiles/intel/cpu.yaml",
+  "src/instructlab/profiles/intel/gaudi/gaudi_3.yaml",
+  "src/instructlab/profiles/nvidia/a100/a100_x2.yaml",
+  "src/instructlab/profiles/nvidia/a100/a100_x4.yaml",
+  "src/instructlab/profiles/nvidia/a100/a100_x8.yaml",
+  "src/instructlab/profiles/nvidia/h100/h100_x2.yaml",
+  "src/instructlab/profiles/nvidia/h100/h100_x4.yaml",
+  "src/instructlab/profiles/nvidia/h100/h100_x8.yaml",
+  "src/instructlab/profiles/nvidia/l4/l4_x8.yaml",
+  "src/instructlab/profiles/nvidia/l40s/l40s_x4.yaml",
+  "src/instructlab/profiles/nvidia/l40s/l40s_x8.yaml"
+ ],
+ "aws-cloudformation__cfn-lint-3779": [
+  "src/cfnlint/data/schemas/other/iam/policy.json"
+ ],
+ "pvlib__pvlib-python-2286": [
+  "docs/sphinx/source/reference/airmass_atmospheric.rst",
+  "docs/sphinx/source/whatsnew/v0.11.2.rst",
+  "pvlib/atmosphere.py"
+ ],
+ "run-llama__llama_deploy-330": [
+  "llama_deploy/client/async_client.py",
+  "llama_deploy/client/sync_client.py",
+  "llama_deploy/control_plane/server.py",
+  "llama_deploy/services/workflow.py",
+  "llama_deploy/types.py"
+ ],
+ "pylint-dev__pylint-10044": [
+  "doc/data/messages/c/consider-alternative-union-syntax/bad.py",
+  "doc/data/messages/c/consider-alternative-union-syntax/details.rst",
+  "doc/data/messages/c/consider-alternative-union-syntax/good.py",
+  "doc/user_guide/checkers/extensions.rst",
+  "pylint/extensions/typing.py"
+ ],
+ "conan-io__conan-17092": [
+  "conan/internal/default_settings.py",
+  "conan/tools/build/flags.py"
+ ],
+ "conan-io__conan-17117": [
+  "conan/api/subapi/profiles.py",
+  "conans/client/graph/graph.py",
+  "conans/client/graph/graph_binaries.py",
+  "conans/client/graph/graph_builder.py",
+  "conans/model/conf.py"
+ ],
+ "streamlink__streamlink-6242": [
+  "src/streamlink/plugins/tv3cat.py"
+ ],
+ "aws-cloudformation__cfn-lint-3768": [
+  "src/cfnlint/rules/resources/stepfunctions/StateMachineDefinition.py"
+ ],
+ "aws-cloudformation__cfn-lint-3805": [
+  "src/cfnlint/rules/resources/properties/StringLength.py"
+ ],
+ "conan-io__conan-17102": [
+  "conan/cli/commands/graph.py",
+  "conans/client/graph/install_graph.py"
+ ],
+ "pydata__xarray-9636": [
+  "DATATREE_MIGRATION_GUIDE.md",
+  "doc/api.rst",
+  "doc/user-guide/hierarchical-data.rst",
+  "doc/whats-new.rst",
+  "xarray/__init__.py",
+  "xarray/core/computation.py",
+  "xarray/core/dataarray.py",
+  "xarray/core/datatree.py",
+  "xarray/core/datatree_mapping.py",
+  "xarray/core/datatree_ops.py",
+  "xarray/core/formatting.py",
+  "xarray/core/treenode.py",
+  "xarray/core/utils.py"
+ ],
+ "matplotlib__matplotlib-28933": [
+  "doc/api/next_api_changes/deprecations/28933-AL.rst",
+  "lib/matplotlib/lines.py",
+  "lib/matplotlib/lines.pyi"
+ ],
+ "matplotlib__matplotlib-29007": [
+  "doc/api/next_api_changes/deprecations/28007-TH.rst",
+  "lib/matplotlib/_pylab_helpers.py",
+  "lib/matplotlib/figure.py",
+  "lib/matplotlib/figure.pyi"
+ ],
+ "conan-io__conan-17132": [
+  "conans/client/downloaders/file_downloader.py",
+  "conans/client/rest/auth_manager.py",
+  "conans/client/rest/file_uploader.py",
+  "conans/server/service/authorize.py"
+ ],
+ "beetbox__beets-5457": [
+  "beetsplug/lyrics.py",
+  "docs/changelog.rst"
+ ],
+ "reflex-dev__reflex-4087": [
+  "reflex/state.py"
+ ],
+ "aws-cloudformation__cfn-lint-3789": [
+  "scripts/boto/update_schemas_from_boto.py",
+  "src/cfnlint/data/schemas/patches/extensions/all/aws_appsync_graphqlapi/boto.json",
+  "src/cfnlint/data/schemas/patches/extensions/all/aws_batch_computeenvironment/boto.json",
+  "src/cfnlint/data/schemas/patches/extensions/all/aws_ec2_instance/boto.json",
+  "src/cfnlint/data/schemas/patches/extensions/all/aws_ec2_launchtemplate/boto.json",
+  "src/cfnlint/data/schemas/patches/extensions/all/aws_ec2_networkinterface/boto.json",
+  "src/cfnlint/data/schemas/providers/ap_southeast_5/aws-ec2-instance.json",
+  "src/cfnlint/data/schemas/providers/cn_northwest_1/aws-ecs-service.json",
+  "src/cfnlint/data/schemas/providers/eu_central_1/aws-ec2-launchtemplate.json",
+  "src/cfnlint/data/schemas/providers/eu_central_1/aws-ec2-networkinterface.json",
+  "src/cfnlint/data/schemas/providers/eu_south_1/aws-ecs-service.json",
+  "src/cfnlint/data/schemas/providers/us_east_1/aws-appsync-graphqlapi.json",
+  "src/cfnlint/data/schemas/providers/us_east_1/aws-batch-computeenvironment.json",
+  "src/cfnlint/data/schemas/providers/us_east_1/aws-ec2-instance.json",
+  "src/cfnlint/data/schemas/providers/us_east_1/aws-ec2-launchtemplate.json",
+  "src/cfnlint/data/schemas/providers/us_east_1/aws-ec2-networkinterface.json",
+  "src/cfnlint/data/schemas/providers/us_gov_east_1/aws-ecs-service.json",
+  "src/cfnlint/jsonschema/_keywords.py",
+  "src/cfnlint/jsonschema/validators.py",
+  "src/cfnlint/rules/parameters/Enum.py",
+  "src/cfnlint/rules/resources/properties/Enum.py",
+  "src/cfnlint/rules/resources/properties/Properties.py"
+ ],
+ "pdm-project__pdm-3237": [
+  "news/3231.bug.md",
+  "src/pdm/cli/commands/build.py"
+ ],
+ "aws-cloudformation__cfn-lint-3749": [
+  "src/cfnlint/template/transforms/_language_extensions.py"
+ ],
+ "aws-cloudformation__cfn-lint-3764": [
+  "src/cfnlint/template/transforms/_language_extensions.py"
+ ],
+ "instructlab__instructlab-2548": [
+  "src/instructlab/cli/model/train.py"
+ ],
+ "stanfordnlp__dspy-1651": [
+  "dspy/functional/functional.py"
+ ],
+ "conan-io__conan-17129": [
+  "conan/internal/api/install/generators.py",
+  "conan/tools/env/__init__.py",
+  "conan/tools/env/environment.py",
+  "conans/model/conan_file.py",
+  "conans/model/conanfile_interface.py"
+ ],
+ "jupyterlab__jupyter-ai-1022": [
+  "packages/jupyter-ai/jupyter_ai/chat_handlers/base.py",
+  "packages/jupyter-ai/jupyter_ai/chat_handlers/default.py",
+  "packages/jupyter-ai/jupyter_ai/extension.py",
+  "packages/jupyter-ai/jupyter_ai/handlers.py",
+  "packages/jupyter-ai/jupyter_ai/models.py",
+  "packages/jupyter-ai/src/components/chat-input.tsx",
+  "packages/jupyter-ai/src/components/chat-input/send-button.tsx",
+  "packages/jupyter-ai/src/components/chat.tsx",
+  "packages/jupyter-ai/src/contexts/user-context.tsx",
+  "packages/jupyter-ai/src/handler.ts",
+  "packages/jupyter-ai/src/index.ts",
+  "packages/jupyter-ai/src/widgets/chat-sidebar.tsx"
+ ],
+ "conan-io__conan-17183": [
+  "conan/tools/google/bazel.py"
+ ],
+ "keras-team__keras-20396": [
+  "keras/src/backend/jax/trainer.py",
+  "keras/src/backend/numpy/trainer.py",
+  "keras/src/backend/tensorflow/trainer.py",
+  "keras/src/backend/torch/trainer.py",
+  "keras/src/trainers/epoch_iterator.py",
+  "keras/src/trainers/trainer.py"
+ ],
+ "instructlab__instructlab-2526": [
+  "src/instructlab/configuration.py"
+ ],
+ "reflex-dev__reflex-4266": [
+  "reflex/config.py",
+  "reflex/utils/prerequisites.py"
+ ],
+ "sphinx-doc__sphinx-12975": [
+  "CHANGES.rst",
+  "doc/usage/configuration.rst",
+  "sphinx/addnodes.py",
+  "sphinx/domains/javascript.py",
+  "sphinx/domains/python/__init__.py",
+  "sphinx/domains/python/_annotations.py",
+  "sphinx/domains/python/_object.py",
+  "sphinx/writers/html5.py",
+  "sphinx/writers/latex.py",
+  "sphinx/writers/text.py"
+ ],
+ "stanfordnlp__dspy-1609": [
+  "dspy/adapters/chat_adapter.py",
+  "dspy/predict/predict.py",
+  "dspy/signatures/utils.py",
+  "dspy/utils/dummies.py"
+ ],
+ "python-control__python-control-1064": [
+  "control/frdata.py",
+  "control/xferfcn.py"
+ ],
+ "aws-cloudformation__cfn-lint-3821": [
+  "src/cfnlint/rules/resources/HardCodedArnProperties.py"
+ ],
+ "conan-io__conan-17300": [
+  "conan/cli/commands/list.py"
+ ],
+ "run-llama__llama_deploy-356": [
+  "llama_deploy/control_plane/server.py"
+ ],
+ "conan-io__conan-17266": [
+  "conan/tools/meson/toolchain.py"
+ ],
+ "aws-cloudformation__cfn-lint-3817": [
+  "src/cfnlint/rules/functions/GetAtt.py"
+ ],
+ "pdm-project__pdm-3314": [
+  "news/3301.feature.md",
+  "src/pdm/cli/options.py",
+  "src/pdm/cli/utils.py"
+ ],
+ "reflex-dev__reflex-4371": [
+  "reflex/base.py",
+  "reflex/state.py"
+ ],
+ "pvlib__pvlib-python-2292": [
+  "docs/sphinx/source/whatsnew/v0.11.3.rst",
+  "pvlib/snow.py"
+ ],
+ "conan-io__conan-17302": [
+  "conan/tools/cmake/cmakedeps2/cmakedeps.py",
+  "conan/tools/cmake/cmakedeps2/config.py",
+  "conan/tools/cmake/cmakedeps2/targets.py"
+ ],
+ "kozea__weasyprint-2300": [
+  "weasyprint/layout/block.py"
+ ],
+ "pdm-project__pdm-3255": [
+  "news/3254.bugfix.md",
+  "src/pdm/models/session.py"
+ ],
+ "conan-io__conan-17366": [
+  "conan/cli/printers/graph.py"
+ ],
+ "deepset-ai__haystack-8525": [
+  "haystack/components/preprocessors/document_splitter.py",
+  "releasenotes/notes/feat-split-by-line-splitter-aa804cb2346c6ed9.yaml"
+ ],
+ "instructlab__instructlab-2585": [
+  "CHANGELOG.md",
+  "README.md",
+  "TROUBLESHOOTING.md",
+  "src/instructlab/clickext.py",
+  "src/instructlab/configuration.py",
+  "src/instructlab/defaults.py",
+  "src/instructlab/model/backends/common.py",
+  "src/instructlab/model/chat.py",
+  "src/instructlab/model/download.py",
+  "src/instructlab/profiles/apple/m1/m1_max.yaml",
+  "src/instructlab/profiles/apple/m1/m1_ultra.yaml",
+  "src/instructlab/profiles/apple/m2/m2.yaml",
+  "src/instructlab/profiles/apple/m2/m2_max.yaml",
+  "src/instructlab/profiles/apple/m2/m2_pro.yaml",
+  "src/instructlab/profiles/apple/m2/m2_ultra.yaml",
+  "src/instructlab/profiles/apple/m3/m3.yaml",
+  "src/instructlab/profiles/apple/m3/m3_max.yaml",
+  "src/instructlab/profiles/apple/m3/m3_pro.yaml",
+  "src/instructlab/profiles/intel/cpu.yaml",
+  "src/instructlab/train/lora_mlx/utils.py"
+ ],
+ "conan-io__conan-17382": [
+  "conan/tools/system/package_manager.py"
+ ],
+ "conan-io__conan-17292": [
+  "conan/tools/cmake/cmake.py"
+ ],
+ "conan-io__conan-17326": [
+  "conans/model/dependencies.py"
+ ],
+ "keras-team__keras-20534": [
+  "keras/src/optimizers/base_optimizer.py"
+ ],
+ "pylint-dev__pylint-10062": [
+  "doc/data/messages/p/possibly-used-before-assignment/details.rst",
+  "doc/whatsnew/fragments/10061.false_positive",
+  "pylint/checkers/variables.py"
+ ],
+ "jupyterlab__jupyter-ai-1125": [
+  "packages/jupyter-ai/jupyter_ai/config_manager.py"
+ ],
+ "instructlab__instructlab-2592": [
+  ".spellcheck-en-custom.txt",
+  "CHANGELOG.md",
+  "requirements.txt",
+  "requirements/cuda.txt",
+  "requirements/rocm.txt",
+  "src/instructlab/cli/data/generate.py",
+  "src/instructlab/cli/model/train.py",
+  "src/instructlab/common.py",
+  "src/instructlab/configuration.py",
+  "src/instructlab/data/generate_data.py",
+  "src/instructlab/defaults.py",
+  "src/instructlab/model/backends/common.py",
+  "src/instructlab/model/backends/vllm.py",
+  "src/instructlab/model/chat.py",
+  "src/instructlab/train/linux_train.py",
+  "src/instructlab/train/lora_mlx/make_data.py",
+  "src/instructlab/utils.py"
+ ],
+ "reflex-dev__reflex-4427": [
+  "reflex/state.py"
+ ],
+ "pvlib__pvlib-python-2291": [
+  "docs/sphinx/source/whatsnew/v0.11.2.rst",
+  "pvlib/ivtools/sdm.py"
+ ],
+ "run-llama__llama_deploy-372": [
+  "llama_deploy/apiserver/deployment.py",
+  "llama_deploy/apiserver/routers/deployments.py",
+  "llama_deploy/apiserver/routers/status.py",
+  "llama_deploy/client/models/apiserver.py",
+  "llama_deploy/types/__init__.py",
+  "llama_deploy/types/apiserver.py"
+ ],
+ "yt-dlp__yt-dlp-11425": [
+  "yt_dlp/cookies.py"
+ ],
+ "keras-team__keras-20443": [
+  "keras/src/utils/io_utils.py"
+ ],
+ "instructlab__instructlab-2572": [
+  "CHANGELOG.md",
+  "src/instructlab/config/init.py"
+ ],
+ "pydata__xarray-9760": [
+  "doc/whats-new.rst",
+  "xarray/core/variable.py"
+ ],
+ "conan-io__conan-17301": [
+  "conan/tools/cmake/cmake.py",
+  "conan/tools/microsoft/msbuild.py"
+ ],
+ "reflex-dev__reflex-4347": [
+  "reflex/state.py"
+ ],
+ "kozea__weasyprint-2303": [
+  "weasyprint/pdf/stream.py"
+ ],
+ "joke2k__faker-2142": [
+  "faker/providers/bank/nl_BE/__init__.py"
+ ],
+ "projectmesa__mesa-2523": [
+  "mesa/batchrunner.py"
+ ],
+ "pydata__xarray-9765": [
+  "doc/whats-new.rst",
+  "xarray/conventions.py"
+ ],
+ "pypsa__pypsa-1091": [
+  "examples/scigrid-de/scigrid-with-load-gen-trafos/network.csv",
+  "pyproject.toml",
+  "pypsa/descriptors.py",
+  "pypsa/networks.py",
+  "pypsa/optimization/constraints.py",
+  "pypsa/optimization/optimize.py",
+  "pypsa/pf.py",
+  "pypsa/utils.py"
+ ],
+ "sphinx-doc__sphinx-13127": [
+  "CHANGES.rst",
+  "doc/usage/configuration.rst",
+  "sphinx/builders/linkcheck.py",
+  "sphinx/util/requests.py"
+ ],
+ "run-llama__llama_deploy-384": [
+  "llama_deploy/cli/run.py"
+ ],
+ "stanfordnlp__dspy-1741": [
+  "dspy/predict/predict.py"
+ ],
+ "stanfordnlp__dspy-1801": [
+  "dspy/adapters/chat_adapter.py",
+  "dspy/adapters/image_utils.py",
+  "dspy/adapters/json_adapter.py",
+  "dspy/adapters/utils.py",
+  "dspy/predict/predict.py",
+  "examples/outdated_v2.4_examples/vlm/.gitignore",
+  "examples/outdated_v2.4_examples/vlm/mmmu.ipynb"
+ ],
+ "pdm-project__pdm-3250": [
+  "news/3247.bugfix.md",
+  "src/pdm/cli/commands/add.py",
+  "src/pdm/cli/filters.py",
+  "src/pdm/project/core.py"
+ ],
+ "pylint-dev__pylint-10089": [
+  "custom_dict.txt",
+  "doc/whatsnew/fragments/10103.bugfix",
+  "pylint/lint/run.py"
+ ],
+ "pytorch__torchtune-2066": [
+  "recipes/configs/mistral/7B_full_ppo_low_memory.yaml",
+  "recipes/ppo_full_finetune_single_device.py",
+  "torchtune/generation/_generation.py",
+  "torchtune/modules/kv_cache.py",
+  "torchtune/modules/transformer.py",
+  "torchtune/rlhf/loss/ppo.py",
+  "torchtune/rlhf/rewards.py",
+  "torchtune/training/pooling.py"
+ ],
+ "pylint-dev__pylint-10097": [
+  "doc/whatsnew/fragments/10076.false_positive",
+  "pylint/checkers/variables.py"
+ ],
+ "beetbox__beets-5495": [
+  "beets/importer.py",
+  "docs/changelog.rst"
+ ],
+ "run-llama__llama_deploy-399": [
+  "llama_deploy/apiserver/config_parser.py",
+  "llama_deploy/apiserver/deployment.py",
+  "poetry.lock",
+  "pyproject.toml"
+ ],
+ "wemake-services__wemake-python-styleguide-3117": [
+  "CHANGELOG.md",
+  "wemake_python_styleguide/violations/refactoring.py",
+  "wemake_python_styleguide/visitors/ast/compares.py"
+ ],
+ "streamlink__streamlink-6361": [
+  "src/streamlink_cli/show_matchers.py"
+ ],
+ "python-telegram-bot__python-telegram-bot-4626": [
+  "telegram/ext/_baseupdateprocessor.py",
+  "telegram/ext/_utils/asyncio.py"
+ ],
+ "conan-io__conan-17408": [
+  "conans/client/rest_client_local_recipe_index.py"
+ ],
+ "wemake-services__wemake-python-styleguide-3129": [
+  "CHANGELOG.md",
+  "wemake_python_styleguide/violations/consistency.py",
+  "wemake_python_styleguide/visitors/ast/operators.py"
+ ],
+ "conan-io__conan-17538": [
+  "conan/api/subapi/new.py",
+  "conan/api/subapi/workspace.py",
+  "conan/cli/commands/new.py",
+  "conan/cli/commands/workspace.py",
+  "conan/internal/api/new/workspace.py",
+  "conan/internal/workspace.py"
+ ],
+ "conan-io__conan-17532": [
+  "conan/tools/gnu/gnutoolchain.py"
+ ],
+ "bridgecrewio__checkov-6895": [
+  "checkov/terraform/checks/resource/azure/PostgreSQLFlexiServerGeoBackupEnabled.py"
+ ],
+ "aws-cloudformation__cfn-lint-3890": [
+  "src/cfnlint/rules/resources/lmbd/SnapStartSupported.py"
+ ],
+ "reflex-dev__reflex-4563": [
+  "reflex/app.py",
+  "reflex/model.py",
+  "reflex/utils/prerequisites.py"
+ ],
+ "beeware__briefcase-2085": [
+  "changes/2077.bugfix.rst",
+  "src/briefcase/commands/base.py"
+ ],
+ "kedro-org__kedro-4387": [
+  "kedro/framework/cli/starters.py"
+ ],
+ "pvlib__pvlib-python-2341": [
+  "docs/sphinx/source/whatsnew/v0.11.3.rst",
+  "pvlib/location.py",
+  "pvlib/tools.py"
+ ],
+ "conan-io__conan-17514": [
+  "conan/api/conan_api.py",
+  "conan/api/subapi/config.py",
+  "conan/api/subapi/local.py",
+  "conan/api/subapi/remotes.py",
+  "conan/cli/command.py",
+  "conan/cli/commands/config.py",
+  "conan/internal/model/conf.py",
+  "conans/client/migrations.py"
+ ],
+ "streamlink__streamlink-6328": [
+  "src/streamlink/stream/dash/manifest.py"
+ ],
+ "aws-cloudformation__cfn-lint-3866": [
+  "src/cfnlint/template/transforms/_language_extensions.py"
+ ],
+ "aws-cloudformation__cfn-lint-3855": [
+  "src/cfnlint/rules/conditions/EqualsIsUseful.py"
+ ],
+ "yt-dlp__yt-dlp-11880": [
+  "yt_dlp/YoutubeDL.py"
+ ],
+ "aws-cloudformation__cfn-lint-3856": [
+  "src/cfnlint/context/context.py",
+  "src/cfnlint/jsonschema/_resolvers_cfn.py",
+  "src/cfnlint/jsonschema/validators.py"
+ ],
+ "pytorch__torchtune-2139": [
+  "recipes/knowledge_distillation_distributed.py",
+  "recipes/knowledge_distillation_single_device.py",
+  "recipes/lora_dpo_distributed.py",
+  "recipes/lora_finetune_distributed.py",
+  "recipes/lora_finetune_single_device.py",
+  "recipes/qat_lora_finetune_distributed.py",
+  "torchtune/modules/peft/__init__.py",
+  "torchtune/modules/peft/_utils.py",
+  "torchtune/modules/peft/dora.py",
+  "torchtune/modules/peft/lora.py"
+ ],
+ "matplotlib__matplotlib-29285": [
+  "lib/mpl_toolkits/mplot3d/art3d.py"
+ ],
+ "matplotlib__matplotlib-29388": [
+  "lib/matplotlib/axis.py"
+ ],
+ "aws-cloudformation__cfn-lint-3854": [
+  "src/cfnlint/template/transforms/_language_extensions.py"
+ ],
+ "beeware__briefcase-2088": [
+  "changes/2087.bugfix.rst",
+  "src/briefcase/platforms/linux/__init__.py"
+ ],
+ "bridgecrewio__checkov-6893": [
+  "checkov/terraform/checks/graph_checks/azure/AzureSubnetConfigWithNSG.yaml"
+ ],
+ "deepset-ai__haystack-8609": [
+  "haystack/components/converters/pypdf.py",
+  "releasenotes/notes/remove-deprecated-converter-init-parameter-8a225b535e05af79.yaml"
+ ],
+ "wemake-services__wemake-python-styleguide-3128": [
+  "CHANGELOG.md",
+  "wemake_python_styleguide/logic/tokens/strings.py",
+  "wemake_python_styleguide/violations/consistency.py",
+  "wemake_python_styleguide/visitors/tokenize/primitives.py"
+ ],
+ "python-telegram-bot__python-telegram-bot-4617": [
+  ".gitignore",
+  "telegram/_bot.py",
+  "telegram/_botcommandscope.py",
+  "telegram/_business.py",
+  "telegram/_callbackquery.py",
+  "telegram/_chatbackground.py",
+  "telegram/_chatboost.py",
+  "telegram/_chatfullinfo.py",
+  "telegram/_chatinvitelink.py",
+  "telegram/_chatjoinrequest.py",
+  "telegram/_chatlocation.py",
+  "telegram/_chatmember.py",
+  "telegram/_chatmemberupdated.py",
+  "telegram/_chatpermissions.py",
+  "telegram/_choseninlineresult.py",
+  "telegram/_files/_basethumbedmedium.py",
+  "telegram/_files/sticker.py",
+  "telegram/_files/venue.py",
+  "telegram/_games/game.py",
+  "telegram/_games/gamehighscore.py",
+  "telegram/_gifts.py",
+  "telegram/_giveaway.py",
+  "telegram/_inline/inlinekeyboardbutton.py",
+  "telegram/_inline/inlinekeyboardmarkup.py",
+  "telegram/_inline/inlinequery.py",
+  "telegram/_inline/inlinequeryresultsbutton.py",
+  "telegram/_inline/inputinvoicemessagecontent.py",
+  "telegram/_inline/preparedinlinemessage.py",
+  "telegram/_keyboardbutton.py",
+  "telegram/_keyboardbuttonrequest.py",
+  "telegram/_menubutton.py",
+  "telegram/_message.py",
+  "telegram/_messageentity.py",
+  "telegram/_messageorigin.py",
+  "telegram/_messagereactionupdated.py",
+  "telegram/_paidmedia.py",
+  "telegram/_passport/credentials.py",
+  "telegram/_passport/encryptedpassportelement.py",
+  "telegram/_passport/passportdata.py",
+  "telegram/_passport/passportfile.py",
+  "telegram/_payment/orderinfo.py",
+  "telegram/_payment/precheckoutquery.py",
+  "telegram/_payment/shippingquery.py",
+  "telegram/_payment/stars/affiliateinfo.py",
+  "telegram/_payment/stars/revenuewithdrawalstate.py",
+  "telegram/_payment/stars/startransactions.py",
+  "telegram/_payment/stars/transactionpartner.py",
+  "telegram/_payment/successfulpayment.py",
+  "telegram/_poll.py",
+  "telegram/_proximityalerttriggered.py",
+  "telegram/_reaction.py",
+  "telegram/_reply.py",
+  "telegram/_shared.py",
+  "telegram/_story.py",
+  "telegram/_telegramobject.py",
+  "telegram/_update.py",
+  "telegram/_userprofilephotos.py",
+  "telegram/_utils/argumentparsing.py",
+  "telegram/_videochat.py",
+  "telegram/_webhookinfo.py"
+ ],
+ "pypsa__pypsa-1112": [
+  "doc/references/release-notes.rst",
+  "pypsa/consistency.py",
+  "pypsa/networks.py"
+ ],
+ "keras-team__keras-20609": [
+  "keras/src/backend/tensorflow/trainer.py",
+  "keras/src/losses/loss.py",
+  "keras/src/trainers/trainer.py"
+ ],
+ "pybamm-team__pybamm-4644": [
+  "CHANGELOG.md",
+  "docs/source/examples/notebooks/models/pouch-cell-model.ipynb",
+  "examples/scripts/compare_comsol/compare_comsol_DFN.py",
+  "src/pybamm/expression_tree/symbol.py",
+  "src/pybamm/models/base_model.py"
+ ],
+ "beeware__briefcase-2075": [
+  "changes/2074.removal.rst",
+  "src/briefcase/platforms/linux/flatpak.py"
+ ],
+ "deepset-ai__haystack-8619": [
+  "haystack/components/converters/azure.py",
+  "haystack/components/converters/csv.py",
+  "haystack/components/converters/docx.py",
+  "haystack/components/converters/html.py",
+  "haystack/components/converters/json.py",
+  "haystack/components/converters/markdown.py",
+  "haystack/components/converters/pdfminer.py",
+  "haystack/components/converters/pptx.py",
+  "haystack/components/converters/pypdf.py",
+  "haystack/components/converters/tika.py",
+  "haystack/components/converters/txt.py",
+  "releasenotes/notes/update-store-full-path-default-value-129f701ba07b944b.yaml"
+ ],
+ "matplotlib__matplotlib-29249": [
+  "lib/matplotlib/axis.py"
+ ],
+ "matplotlib__matplotlib-29258": [
+  "lib/matplotlib/table.py"
+ ],
+ "conan-io__conan-17520": [
+  "conan/internal/model/conf.py",
+  "conan/tools/files/conandata.py",
+  "conan/tools/files/patches.py"
+ ],
+ "wemake-services__wemake-python-styleguide-3195": [
+  "CHANGELOG.md",
+  "pyproject.toml",
+  "setup.cfg",
+  "wemake_python_styleguide/logic/tokens/docstrings.py",
+  "wemake_python_styleguide/logic/tokens/strings.py",
+  "wemake_python_styleguide/logic/tree/bodies.py",
+  "wemake_python_styleguide/violations/best_practices.py",
+  "wemake_python_styleguide/violations/consistency.py",
+  "wemake_python_styleguide/visitors/ast/statements.py",
+  "wemake_python_styleguide/visitors/tokenize/primitives.py",
+  "wemake_python_styleguide/visitors/tokenize/statements.py"
+ ],
+ "streamlink__streamlink-6338": [
+  "src/streamlink/stream/dash/dash.py"
+ ],
+ "aws-cloudformation__cfn-lint-3875": [
+  "src/cfnlint/template/transforms/_language_extensions.py"
+ ],
+ "run-llama__llama_deploy-397": [
+  "llama_deploy/message_queues/rabbitmq.py"
+ ],
+ "reflex-dev__reflex-4510": [
+  "reflex/state.py"
+ ],
+ "aws-cloudformation__cfn-lint-3862": [
+  "src/cfnlint/config.py",
+  "src/cfnlint/data/CfnLintCli/config/schema.json",
+  "src/cfnlint/rules/errors/__init__.py",
+  "src/cfnlint/rules/errors/config.py",
+  "src/cfnlint/runner.py"
+ ],
+ "conan-io__conan-17517": [
+  "conan/api/output.py",
+  "conans/client/rest/auth_manager.py",
+  "conans/client/rest/conan_requester.py"
+ ],
+ "wemake-services__wemake-python-styleguide-3114": [
+  "CHANGELOG.md",
+  "poetry.lock",
+  "wemake_python_styleguide/formatter.py"
+ ],
+ "instructlab__instructlab-2825": [
+  "CHANGELOG.md",
+  "README.md",
+  "containers/cuda/Containerfile",
+  "containers/hpu/Containerfile",
+  "containers/rocm/Containerfile",
+  "docs/gpu-acceleration.md",
+  "requirements.txt",
+  "scripts/infra/cloud-instance.sh",
+  "src/instructlab/cli/model/serve.py",
+  "src/instructlab/configuration.py",
+  "src/instructlab/defaults.py",
+  "src/instructlab/model/chat.py",
+  "src/instructlab/model/serve_backend.py",
+  "src/instructlab/taxonomy/diff.py",
+  "tox.ini"
+ ],
+ "cyclotruc__gitingest-94": [
+  "src/gitingest/parse_query.py"
+ ],
+ "cyclotruc__gitingest-115": [
+  "src/gitingest/parse_query.py"
+ ],
+ "python-babel__babel-1179": [
+  "babel/dates.py"
+ ],
+ "matplotlib__matplotlib-29537": [
+  "lib/matplotlib/ticker.py"
+ ],
+ "python-babel__babel-1164": [
+  "babel/core.py",
+  "babel/dates.py",
+  "babel/lists.py",
+  "babel/messages/catalog.py",
+  "babel/messages/plurals.py",
+  "babel/messages/pofile.py",
+  "babel/numbers.py",
+  "babel/support.py",
+  "babel/units.py"
+ ],
+ "run-llama__llama_deploy-438": [
+  "llama_deploy/client/base.py",
+  "llama_deploy/client/models/core.py",
+  "llama_deploy/deploy/deploy.py",
+  "llama_deploy/deploy/network_workflow.py"
+ ],
+ "cyclotruc__gitingest-134": [
+  "src/gitingest/query_parser.py"
+ ],
+ "reflex-dev__reflex-4711": [
+  "reflex/app.py",
+  "reflex/compiler/utils.py",
+  "reflex/middleware/hydrate_middleware.py",
+  "reflex/state.py",
+  "reflex/utils/exec.py",
+  "reflex/vars/base.py",
+  "reflex/vars/dep_tracking.py"
+ ],
+ "kedro-org__kedro-4427": [
+  "RELEASE.md",
+  "docs/source/notebooks_and_ipython/notebook-example/add_kedro_to_a_notebook.md",
+  "kedro/pipeline/pipeline.py"
+ ],
+ "matplotlib__matplotlib-29431": [
+  "galleries/examples/misc/ftface_props.py",
+  "lib/matplotlib/ft2font.pyi",
+  "src/ft2font_wrapper.cpp"
+ ],
+ "sissbruecker__linkding-971": [
+  "bookmarks/utils.py",
+  "docs/src/content/docs/options.md",
+  "siteroot/settings/base.py"
+ ],
+ "privacyidea__privacyidea-4226": [
+  "privacyidea/cli/privacyideatokenjanitor/findtokens.py",
+  "privacyidea/lib/tokenclass.py"
+ ],
+ "koxudaxi__datamodel-code-generator-2259": [
+  "datamodel_code_generator/model/enum.py"
+ ],
+ "pdm-project__pdm-3374": [
+  "news/3368.bugfix.md",
+  "src/pdm/_types.py",
+  "src/pdm/cli/commands/publish/__init__.py",
+  "src/pdm/models/auth.py",
+  "src/pdm/project/config.py",
+  "src/pdm/project/core.py"
+ ],
+ "huggingface__smolagents-285": [
+  "src/smolagents/local_python_executor.py"
+ ],
+ "sphinx-doc__sphinx-13200": [
+  "CHANGES.rst",
+  "sphinx/ext/autodoc/__init__.py",
+  "sphinx/util/inspect.py"
+ ],
+ "matplotlib__matplotlib-29486": [
+  "lib/matplotlib/axes/_axes.py"
+ ],
+ "dynaconf__dynaconf-1225": [
+  "docs/advanced.md",
+  "docs/configuration.md",
+  "docs/merging.md",
+  "dynaconf/base.py",
+  "dynaconf/cli.py",
+  "dynaconf/loaders/__init__.py",
+  "dynaconf/loaders/env_loader.py",
+  "dynaconf/loaders/ini_loader.py",
+  "dynaconf/loaders/json_loader.py",
+  "dynaconf/loaders/py_loader.py",
+  "dynaconf/loaders/redis_loader.py",
+  "dynaconf/loaders/toml_loader.py",
+  "dynaconf/loaders/yaml_loader.py",
+  "dynaconf/typed/main.py",
+  "dynaconf/utils/__init__.py",
+  "dynaconf/utils/parse_conf.py",
+  "dynaconf/validator.py"
+ ],
+ "streamlink__streamlink-6381": [
+  "src/streamlink/plugins/tiktok.py"
+ ],
+ "joke2k__faker-2155": [
+  "faker/providers/date_time/__init__.py",
+  "faker/proxy.pyi",
+  "faker/typing.py"
+ ],
+ "sphinx-doc__sphinx-13261": [
+  "CHANGES.rst",
+  "sphinx/util/typing.py"
+ ],
+ "kedro-org__kedro-4408": [
+  "RELEASE.md",
+  "kedro/framework/cli/starters.py",
+  "kedro/templates/project/prompts.yml"
+ ],
+ "reflex-dev__reflex-4717": [
+  "reflex/event.py",
+  "reflex/vars/base.py"
+ ],
+ "reflex-dev__reflex-4720": [
+  "reflex/.templates/jinja/web/pages/_app.js.jinja2",
+  "reflex/.templates/web/utils/state.js",
+  "reflex/app.py",
+  "reflex/components/base/strict_mode.py",
+  "reflex/components/base/strict_mode.pyi",
+  "reflex/utils/prerequisites.py"
+ ],
+ "python-babel__babel-1163": [
+  "babel/dates.py"
+ ],
+ "pydata__xarray-9974": [
+  "doc/whats-new.rst",
+  "xarray/core/dataset.py"
+ ],
+ "pydata__xarray-9971": [
+  "ci/requirements/all-but-numba.yml",
+  "ci/requirements/doc.yml",
+  "ci/requirements/environment-3.13.yml",
+  "ci/requirements/environment-windows-3.13.yml",
+  "ci/requirements/environment-windows.yml",
+  "ci/requirements/environment.yml",
+  "doc/whats-new.rst"
+ ],
+ "privacyidea__privacyidea-4223": [
+  "privacyidea/lib/eventhandler/requestmangler.py"
+ ],
+ "streamlink__streamlink-6389": [
+  "src/streamlink/plugins/chzzk.py"
+ ],
+ "projectmesa__mesa-2632": [
+  "mesa/experimental/cell_space/grid.py"
+ ],
+ "projectmesa__mesa-2605": [
+  "mesa/datacollection.py"
+ ],
+ "sphinx-doc__sphinx-13253": [
+  "CHANGES.rst",
+  "sphinx/ext/autodoc/importer.py"
+ ],
+ "privacyidea__privacyidea-4206": [
+  "privacyidea/lib/policy.py",
+  "privacyidea/lib/tokenclass.py",
+  "privacyidea/lib/tokens/emailtoken.py",
+  "privacyidea/lib/tokens/indexedsecrettoken.py",
+  "privacyidea/lib/tokens/pushtoken.py",
+  "privacyidea/lib/tokens/smstoken.py",
+  "privacyidea/lib/tokens/u2ftoken.py",
+  "privacyidea/models.py"
+ ],
+ "instructlab__instructlab-3060": [
+  "src/instructlab/rag/taxonomy_utils.py"
+ ],
+ "huggingface__smolagents-405": [
+  "src/smolagents/local_python_executor.py"
+ ],
+ "instructlab__instructlab-2886": [
+  "src/instructlab/cli/model/chat.py",
+  "src/instructlab/configuration.py",
+  "src/instructlab/defaults.py",
+  "src/instructlab/model/chat.py"
+ ],
+ "ipython__ipython-14695": [
+  "IPython/core/magics/script.py"
+ ],
+ "instructlab__instructlab-2927": [
+  "src/instructlab/model/serve_backend.py"
+ ],
+ "kedro-org__kedro-4406": [
+  "RELEASE.md",
+  "kedro/__init__.py",
+  "kedro/ipython/__init__.py",
+  "pyproject.toml"
+ ],
+ "deepset-ai__haystack-8725": [
+  "haystack/dataclasses/chat_message.py",
+  "releasenotes/notes/rm-function-chat-role-ab401a1fb19713a7.yaml"
+ ],
+ "bridgecrewio__checkov-7002": [
+  "checkov/terraform/checks/resource/gcp/GoogleSubnetworkIPV6PrivateGoogleEnabled.py",
+  "checkov/terraform/checks/resource/gcp/GoogleSubnetworkPrivateGoogleEnabled.py"
+ ],
+ "sissbruecker__linkding-984": [
+  "bookmarks/templates/bookmarks/head.html",
+  "bookmarks/views/bookmarks.py"
+ ],
+ "aws-cloudformation__cfn-lint-3947": [
+  "src/cfnlint/data/schemas/patches/providers/all/aws_iam_managedpolicy/__init__.py",
+  "src/cfnlint/data/schemas/patches/providers/all/aws_iam_managedpolicy/policydocument.json",
+  "src/cfnlint/data/schemas/providers/us_east_1/aws-iam-managedpolicy.json",
+  "src/cfnlint/data/schemas/providers/us_gov_east_1/aws-iam-managedpolicy.json",
+  "src/cfnlint/data/schemas/providers/us_gov_west_1/aws-iam-managedpolicy.json",
+  "src/cfnlint/rules/resources/properties/StringLength.py"
+ ],
+ "koxudaxi__datamodel-code-generator-2327": [
+  "src/datamodel_code_generator/parser/base.py"
+ ],
+ "sissbruecker__linkding-989": [
+  "bookmarks/models.py"
+ ],
+ "pydata__xarray-10076": [
+  "doc/api-hidden.rst",
+  "doc/api.rst",
+  "doc/whats-new.rst",
+  "xarray/core/formatting.py",
+  "xarray/core/indexes.py",
+  "xarray/core/indexing.py",
+  "xarray/indexes/__init__.py",
+  "xarray/indexes/range_index.py"
+ ],
+ "sphinx-doc__sphinx-13318": [
+  "CHANGES.rst",
+  "sphinx/builders/gettext.py",
+  "sphinx/config.py"
+ ],
+ "instructlab__instructlab-3118": [
+  "src/instructlab/cli/model/download.py",
+  "src/instructlab/defaults.py"
+ ],
+ "pvlib__pvlib-python-2393": [
+  "docs/sphinx/source/whatsnew/v0.11.3.rst",
+  "pvlib/pvsystem.py"
+ ],
+ "privacyidea__privacyidea-4233": [
+  "privacyidea/lib/tokens/hotptoken.py",
+  "privacyidea/lib/tokens/pushtoken.py"
+ ],
+ "deepset-ai__haystack-8879": [
+  "haystack/components/generators/chat/openai.py",
+  "releasenotes/notes/fix-openai-chat-generator-with-tools-and-streaming-9776040f0732a8aa.yaml"
+ ],
+ "run-llama__llama_deploy-458": [
+  "llama_deploy/apiserver/routers/deployments.py",
+  "llama_deploy/cli/run.py",
+  "llama_deploy/client/async_client.py",
+  "llama_deploy/client/models/apiserver.py",
+  "llama_deploy/client/models/core.py",
+  "llama_deploy/client/sync_client.py",
+  "llama_deploy/control_plane/server.py",
+  "llama_deploy/orchestrators/simple.py",
+  "llama_deploy/types/core.py"
+ ],
+ "deepset-ai__haystack-8940": [
+  "haystack/core/pipeline/base.py",
+  "releasenotes/notes/fix-socket-input-overwriting-6c29d657e4887458.yaml"
+ ],
+ "streamlink__streamlink-6439": [
+  "src/streamlink/plugins/tf1.py"
+ ],
+ "pybamm-team__pybamm-4816": [
+  "CHANGELOG.md",
+  "docs/source/api/models/submodels/interface/open_circuit_potential/axen_ocp.rst",
+  "docs/source/api/models/submodels/interface/open_circuit_potential/index.rst",
+  "src/pybamm/CITATIONS.bib",
+  "src/pybamm/models/full_battery_models/base_battery_model.py",
+  "src/pybamm/models/full_battery_models/lithium_ion/base_lithium_ion_model.py",
+  "src/pybamm/models/submodels/interface/open_circuit_potential/__init__.py",
+  "src/pybamm/models/submodels/interface/open_circuit_potential/axen_ocp.py",
+  "src/pybamm/models/submodels/interface/open_circuit_potential/wycisk_ocp.py",
+  "src/pybamm/parameters/lithium_ion_parameters.py"
+ ],
+ "kozea__weasyprint-2387": [
+  "weasyprint/formatting_structure/build.py",
+  "weasyprint/layout/__init__.py",
+  "weasyprint/layout/absolute.py",
+  "weasyprint/layout/block.py",
+  "weasyprint/layout/flex.py",
+  "weasyprint/layout/float.py",
+  "weasyprint/layout/inline.py",
+  "weasyprint/layout/page.py",
+  "weasyprint/layout/percent.py",
+  "weasyprint/layout/preferred.py",
+  "weasyprint/stacking.py"
+ ],
+ "shapely__shapely-2226": [
+  "CHANGES.txt",
+  "shapely/geometry/collection.py"
+ ],
+ "conan-io__conan-17781": [
+  "conan/tools/env/environment.py"
+ ],
+ "python-telegram-bot__python-telegram-bot-4673": [
+  "telegram/ext/_application.py",
+  "telegram/ext/_updater.py",
+  "telegram/ext/_utils/networkloop.py"
+ ],
+ "joke2k__faker-2173": [
+  "faker/providers/date_time/__init__.py",
+  "setup.py"
+ ],
+ "pybamm-team__pybamm-4865": [
+  "src/pybamm/solvers/base_solver.py",
+  "src/pybamm/solvers/idaklu_solver.py"
+ ],
+ "huggingface__smolagents-731": [
+  "src/smolagents/agents.py"
+ ],
+ "sissbruecker__linkding-999": [
+  "bookmarks/api/routes.py",
+  "bookmarks/services/bookmarks.py",
+  "bookmarks/services/tasks.py",
+  "bookmarks/services/website_loader.py",
+  "bookmarks/styles/bookmark-form.css",
+  "bookmarks/templates/bookmarks/bulk_edit/bar.html",
+  "bookmarks/templates/bookmarks/form.html",
+  "bookmarks/views/bookmarks.py"
+ ],
+ "dynaconf__dynaconf-1241": [
+  "dynaconf/utils/parse_conf.py"
+ ],
+ "python-control__python-control-1111": [
+  "control/flatsys/flatsys.py"
+ ],
+ "pvlib__pvlib-python-2400": [
+  "docs/sphinx/source/whatsnew/v0.11.3.rst",
+  "pvlib/spectrum/mismatch.py"
+ ],
+ "matplotlib__matplotlib-29689": [
+  "lib/matplotlib/sphinxext/figmpl_directive.py",
+  "lib/matplotlib/sphinxext/plot_directive.py"
+ ],
+ "privacyidea__privacyidea-4251": [
+  "privacyidea/lib/eventhandler/base.py",
+  "privacyidea/lib/eventhandler/scripthandler.py"
+ ],
+ "sissbruecker__linkding-995": [
+  "bookmarks/api/auth.py",
+  "siteroot/settings/base.py"
+ ],
+ "joke2k__faker-2162": [
+  "faker/providers/doi/__init__.py"
+ ],
+ "shapely__shapely-2224": [
+  "shapely/_ragged_array.py"
+ ],
+ "conan-io__conan-17725": [
+  "conan/internal/model/cpp_info.py",
+  "conan/tools/cmake/cmakedeps2/cmakedeps.py",
+  "conan/tools/cmake/cmakedeps2/target_configuration.py"
+ ],
+ "ipython__ipython-14798": [
+  "IPython/core/magics/execution.py"
+ ],
+ "pylint-dev__pylint-10240": [
+  "doc/whatsnew/fragments/10081.bugfix",
+  "pylint/checkers/variables.py"
+ ],
+ "conan-io__conan-17819": [
+  "conans/client/rest_client_local_recipe_index.py"
+ ],
+ "dynaconf__dynaconf-1238": [
+  "docs/advanced.md",
+  "dynaconf/base.py"
+ ],
+ "keras-team__keras-20880": [
+  "keras/src/export/tfsm_layer.py",
+  "keras/src/layers/activations/activation.py",
+  "keras/src/layers/activations/elu.py",
+  "keras/src/layers/activations/leaky_relu.py",
+  "keras/src/layers/activations/prelu.py",
+  "keras/src/layers/activations/relu.py",
+  "keras/src/layers/activations/softmax.py",
+  "keras/src/layers/attention/additive_attention.py",
+  "keras/src/layers/attention/attention.py",
+  "keras/src/layers/attention/grouped_query_attention.py",
+  "keras/src/layers/attention/multi_head_attention.py",
+  "keras/src/layers/convolutional/base_conv_transpose.py",
+  "keras/src/layers/convolutional/base_depthwise_conv.py",
+  "keras/src/layers/convolutional/base_separable_conv.py",
+  "keras/src/layers/core/identity.py",
+  "keras/src/layers/core/masking.py",
+  "keras/src/layers/core/wrapper.py",
+  "keras/src/layers/layer.py",
+  "keras/src/layers/merging/base_merge.py",
+  "keras/src/layers/merging/concatenate.py",
+  "keras/src/layers/merging/dot.py",
+  "keras/src/layers/normalization/batch_normalization.py",
+  "keras/src/layers/normalization/layer_normalization.py",
+  "keras/src/layers/normalization/unit_normalization.py",
+  "keras/src/layers/pooling/base_global_pooling.py",
+  "keras/src/layers/pooling/base_pooling.py",
+  "keras/src/layers/preprocessing/discretization.py",
+  "keras/src/layers/preprocessing/index_lookup.py",
+  "keras/src/layers/preprocessing/normalization.py",
+  "keras/src/layers/preprocessing/stft_spectrogram.py",
+  "keras/src/layers/regularization/activity_regularization.py",
+  "keras/src/layers/regularization/alpha_dropout.py",
+  "keras/src/layers/regularization/dropout.py",
+  "keras/src/layers/regularization/gaussian_dropout.py",
+  "keras/src/layers/regularization/gaussian_noise.py",
+  "keras/src/layers/reshaping/reshape.py",
+  "keras/src/layers/rnn/bidirectional.py",
+  "keras/src/layers/rnn/conv_lstm.py",
+  "keras/src/layers/rnn/gru.py",
+  "keras/src/layers/rnn/lstm.py",
+  "keras/src/layers/rnn/rnn.py",
+  "keras/src/layers/rnn/simple_rnn.py",
+  "keras/src/layers/rnn/stacked_rnn_cells.py",
+  "keras/src/layers/rnn/time_distributed.py",
+  "keras/src/models/sequential.py",
+  "keras/src/utils/jax_layer.py"
+ ],
+ "dynaconf__dynaconf-1249": [
+  "docs/advanced.md",
+  "dynaconf/__init__.py",
+  "dynaconf/base.py",
+  "dynaconf/hooking.py",
+  "dynaconf/loaders/__init__.py",
+  "dynaconf/loaders/py_loader.py"
+ ],
+ "deepset-ai__haystack-8799": [
+  "haystack/core/pipeline/base.py",
+  "haystack/core/pipeline/draw.py",
+  "releasenotes/notes/custom-mermaid-server-and-params-b88ca837375c3e0f.yaml"
+ ],
+ "conan-io__conan-17708": [
+  "conan/tools/files/files.py",
+  "conans/client/rest/file_uploader.py"
+ ],
+ "koxudaxi__datamodel-code-generator-2349": [
+  "src/datamodel_code_generator/parser/base.py"
+ ],
+ "kozea__weasyprint-2405": [
+  "weasyprint/css/validation/descriptors.py",
+  "weasyprint/text/fonts.py"
+ ],
+ "beeware__briefcase-2214": [
+  "changes/2148.feature.rst",
+  "docs/reference/commands/create.rst",
+  "src/briefcase/commands/build.py",
+  "src/briefcase/commands/create.py",
+  "src/briefcase/commands/package.py",
+  "src/briefcase/commands/update.py"
+ ],
+ "aws-cloudformation__cfn-lint-4051": [
+  "src/cfnlint/data/schemas/other/step_functions/statemachine.json",
+  "src/cfnlint/rules/resources/stepfunctions/StateMachineDefinition.py"
+ ],
+ "yt-dlp__yt-dlp-12684": [
+  "yt_dlp/extractor/youtube/_video.py",
+  "yt_dlp/jsinterp.py"
+ ],
+ "deepset-ai__haystack-8993": [
+  "haystack/utils/type_serialization.py",
+  "releasenotes/notes/fix-type-sede-optional-ea3c9a6b9de60c6e.yaml"
+ ],
+ "deepset-ai__haystack-9066": [
+  "haystack/core/pipeline/base.py"
+ ],
+ "aws-cloudformation__cfn-lint-4002": [
+  "src/cfnlint/rules/resources/codepipeline/PipelineArtifactNames.py"
+ ],
+ "ipython__ipython-14838": [
+  "IPython/core/completer.py"
+ ],
+ "conan-io__conan-17917": [
+  "conan/tools/cmake/cmakedeps/cmakedeps.py",
+  "conan/tools/cmake/cmakedeps/templates/target_configuration.py",
+  "conan/tools/cmake/cmakedeps2/target_configuration.py"
+ ],
+ "conan-io__conan-17967": [
+  "conan/tools/microsoft/msbuilddeps.py"
+ ],
+ "kedro-org__kedro-4580": [
+  ".secrets.baseline",
+  "RELEASE.md",
+  "kedro/io/core.py"
+ ],
+ "pdm-project__pdm-3419": [
+  "news/3418.bugfix.md",
+  "src/pdm/cli/actions.py",
+  "src/pdm/cli/commands/export.py",
+  "src/pdm/cli/commands/list.py",
+  "src/pdm/project/core.py"
+ ],
+ "aws-cloudformation__cfn-lint-4032": [
+  "src/cfnlint/rules/resources/iam/StatementResources.py"
+ ],
+ "deepset-ai__haystack-8997": [
+  "haystack/core/type_utils.py",
+  "releasenotes/notes/add-bare-type-validation-a4720bc66ccaf5ef.yaml"
+ ],
+ "deepset-ai__haystack-8992": [
+  "haystack/components/converters/pdfminer.py",
+  "releasenotes/notes/adding-CID-detection-PDFMinerToDocument-0195a929d64cd502.yaml"
+ ],
+ "conan-io__conan-18028": [
+  "conan/internal/model/conf.py"
+ ],
+ "deepset-ai__haystack-8981": [
+  "haystack/components/generators/chat/hugging_face_local.py",
+  "releasenotes/notes/adding-async-huggingface-local-chat-generator-962512f52282d12d.yaml"
+ ],
+ "pdm-project__pdm-3420": [
+  "news/3404.bugfix.md",
+  "src/pdm/cli/commands/remove.py",
+  "src/pdm/cli/filters.py"
+ ],
+ "ipython__ipython-14822": [
+  "IPython/core/inputtransformer2.py"
+ ],
+ "shapely__shapely-2255": [
+  "shapely/_ragged_array.py"
+ ],
+ "aws-cloudformation__cfn-lint-4009": [
+  "src/cfnlint/rules/conditions/Used.py",
+  "src/cfnlint/template/template.py",
+  "src/cfnlint/template/transforms/_language_extensions.py"
+ ],
+ "deepset-ai__haystack-8973": [
+  "haystack/core/pipeline/base.py",
+  "haystack/core/pipeline/draw.py",
+  "releasenotes/notes/mermaid-timeout-d0bd83dfa90f8544.yaml"
+ ],
+ "pypsa__pypsa-1195": [
+  "doc/references/release-notes.rst",
+  "pypsa/data/component_attrs/generators.csv",
+  "pypsa/data/component_attrs/links.csv",
+  "pypsa/data/variables.csv",
+  "pypsa/optimization/optimize.py",
+  "pypsa/statistics/expressions.py"
+ ],
+ "matplotlib__matplotlib-29781": [
+  "lib/matplotlib/backend_bases.py"
+ ],
+ "matplotlib__matplotlib-29721": [
+  "lib/matplotlib/pyplot.py"
+ ],
+ "python-babel__babel-1194": [
+  "babel/dates.py",
+  "misc/icu4c-tools/.gitignore",
+  "misc/icu4c-tools/Makefile",
+  "misc/icu4c-tools/README.md",
+  "misc/icu4c-tools/icu4c_date_format.cpp"
+ ],
+ "kozea__weasyprint-2398": [
+  "weasyprint/pdf/fonts.py"
+ ],
+ "deepset-ai__haystack-8969": [
+  "haystack/dataclasses/chat_message.py",
+  "releasenotes/notes/add-chat-message-name-field-a8ae96fb9ff13f7b.yaml"
+ ],
+ "aws-cloudformation__cfn-lint-4016": [
+  "src/cfnlint/data/schemas/other/iam/policy.json",
+  "src/cfnlint/data/schemas/other/iam/policy_identity.json",
+  "src/cfnlint/rules/resources/iam/IdentityPolicy.py"
+ ],
+ "python-control__python-control-1142": [
+  "control/xferfcn.py",
+  "doc/linear.rst",
+  "examples/cruise.ipynb"
+ ],
+ "joke2k__faker-2190": [
+  "faker/providers/person/en_PK/__init__.py"
+ ],
+ "pypsa__pypsa-1172": [
+  "doc/references/release-notes.rst",
+  "pypsa/statistics/abstract.py"
+ ],
+ "conan-io__conan-17923": [
+  "conan/internal/model/cpp_info.py"
+ ],
+ "reflex-dev__reflex-5039": [
+  "reflex/config.py",
+  "reflex/constants/installer.py",
+  "reflex/utils/prerequisites.py"
+ ],
+ "huggingface__smolagents-843": [
+  "src/smolagents/local_python_executor.py"
+ ],
+ "aws-cloudformation__cfn-lint-4023": [
+  "src/cfnlint/rules/resources/iam/Permissions.py"
+ ],
+ "jupyterlab__jupyter-ai-1294": [
+  "packages/jupyter-ai/jupyter_ai/config_manager.py"
+ ],
+ "conan-io__conan-18037": [
+  "conan/api/model/list.py"
+ ],
+ "deepset-ai__haystack-9027": [
+  "haystack/components/builders/chat_prompt_builder.py",
+  "haystack/components/builders/prompt_builder.py",
+  "releasenotes/notes/warning-chat-and-prompt-builder-ca42295df9c1b770.yaml"
+ ],
+ "beetbox__beets-5682": [
+  "beetsplug/lastgenre/__init__.py",
+  "docs/plugins/lastgenre.rst"
+ ],
+ "yt-dlp__yt-dlp-12714": [
+  "yt_dlp/extractor/common.py"
+ ],
+ "aws-cloudformation__cfn-lint-3982": [
+  "src/cfnlint/data/schemas/other/iam/policy_identity.json",
+  "src/cfnlint/data/schemas/other/iam/policy_resource.json"
+ ],
+ "keras-team__keras-21072": [
+  "keras/src/backend/common/variables.py",
+  "keras/src/backend/tensorflow/core.py",
+  "keras/src/metrics/metric.py"
+ ]
+}

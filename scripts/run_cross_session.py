@@ -58,8 +58,11 @@ MB = Path(os.environ.get("MEMBENCH_ROOT", Path(__file__).resolve().parent.parent
 SWB = Path(os.environ.get("SWB_ROOT", str(Path.home() / "SWE-bench-Live")))
 DOCKER_BIN = os.environ.get("DOCKER_BIN", "docker")
 CONFIG = os.environ.get("MEMBENCH_CONFIG", "configs/claude_code_qwen_pectra.toml")
-ARMS = ["none", "raw_rag", "structured", "claude_mem", "mem0", "graphiti", "graphify"]
-MEMORY_ARMS = [a for a in ARMS if a != "none"]
+# oracle is non-accumulating: it injects gold-edited file paths (E2 upper bound),
+# so it skips the per-(arm,repo) store, snapshot, and write-back machinery below.
+NON_ACCUM = ("none", "oracle")
+ARMS = ["none", "oracle", "raw_rag", "structured", "claude_mem", "mem0", "graphiti", "graphify"]
+MEMORY_ARMS = [a for a in ARMS if a not in NON_ACCUM]
 
 DATASET_DIR = MB / "dataset/cross_session"
 SEQUENCES = DATASET_DIR / "sequences.jsonl"
@@ -245,7 +248,7 @@ def write_memory(arm: str, repo: str, inst: dict, resolved: bool | None = None) 
     Idempotent (keyed by cs_<iid>) so resumed runs rebuild the store in order
     without duplicating rows.
     """
-    if arm == "none":
+    if arm in NON_ACCUM:
         return
     iid = inst["instance_id"]
     mid = f"cs_{iid}"
@@ -295,7 +298,7 @@ def run_agent(inst: dict, arm: str, repo: str, k: int, use_mined: bool) -> None:
     workspace = {**inst["workspace"],
                  "template_dir": str(ORIG_DATASET / inst["workspace"]["template_dir"])}
     inst = {**inst, "workspace": workspace}
-    if arm != "none" and not use_mined:
+    if arm not in NON_ACCUM and not use_mined:
         # Point memory at this arm's persistent store (empty for k=1).
         snap = build_snapshot(arm, repo, k)
         inst = {**inst, "memory_corpus": {**inst.get("memory_corpus", {}),
@@ -413,7 +416,7 @@ def main(argv: list[str] | None = None) -> None:
         RUNS = MB / f"runs/cross_session_seed{args.seed}"
 
     arms = [a for a in ARMS if a in set(args.arms.split(","))] if args.arms else list(ARMS)
-    memory_arms = [a for a in arms if a != "none"]
+    memory_arms = [a for a in arms if a not in NON_ACCUM]
     repos = set(args.repos.split(",")) if args.repos else None
 
     if args.dry_run:
