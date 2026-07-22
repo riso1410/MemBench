@@ -60,8 +60,8 @@ DOCKER_BIN = os.environ.get("DOCKER_BIN", "docker")
 CONFIG = os.environ.get("MEMBENCH_CONFIG", "configs/claude_code_qwen_pectra.toml")
 # oracle is non-accumulating: it injects gold-edited file paths (E2 upper bound),
 # so it skips the per-(arm,repo) store, snapshot, and write-back machinery below.
-NON_ACCUM = ("none", "oracle")
-ARMS = ["none", "oracle", "raw_rag", "structured", "claude_mem", "mem0", "graphiti", "graphify"]
+NON_ACCUM = ("none", "oracle", "oracle_strong")
+ARMS = ["none", "oracle", "oracle_strong", "raw_rag", "structured", "claude_mem", "mem0", "graphiti", "graphify"]
 MEMORY_ARMS = [a for a in ARMS if a not in NON_ACCUM]
 
 DATASET_DIR = MB / "dataset/cross_session"
@@ -70,7 +70,8 @@ INSTANCES = DATASET_DIR / "instances.jsonl"
 # template_dir / mined corpus paths in the instance dicts are relative to the
 # original full dataset dir, not dataset/cross_session.
 ORIG_DATASET = MB / "dataset/swebench_live_full"
-RUNS = MB / "runs/cross_session"
+_RUNS_ENV = os.environ.get("MEMBENCH_RUNS", "runs/cross_session")
+RUNS = Path(_RUNS_ENV) if os.path.isabs(_RUNS_ENV) else MB / _RUNS_ENV
 AGENT_TIMEOUT = 2400
 ARM_CONC = int(os.environ.get("MEMBENCH_ARM_CONCURRENCY", "4"))
 EVAL_TIMEOUT = 3600

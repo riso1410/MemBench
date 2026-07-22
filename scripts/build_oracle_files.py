@@ -1,14 +1,17 @@
-"""Build the oracle sidecar: {instance_id: [gold-edited files]}.
+"""Build the oracle sidecars from the HF SWE-bench-Live gold patches.
 
 The gold patch is NOT in the local dataset (gold_patch is blank in
 dataset/**/instances.jsonl); it lives in the HF SWE-bench-Live dataset used at
-scoring time. Run once (on the box with HF access, e.g. pectra) to produce
-dataset/cross_session/oracle_files.json, which the `oracle` memory arm reads.
+scoring time. Run once (on the box with HF access, e.g. pectra) to produce both:
+
+    dataset/cross_session/oracle_files.json    {instance_id: [gold-edited files]}
+    dataset/cross_session/oracle_patches.json  {instance_id: "<gold unified diff>"}
 
     python3 scripts/build_oracle_files.py
 
-The oracle arm injects the file LIST (perfect localization, the E2 upper bound),
-never the diff itself.
+The `oracle`/`oracle_files` arm injects the file LIST (perfect localization, the
+E2 upper bound); the `oracle_strong` arm injects the DIFF itself (near-answer
+upper bound, E2').
 """
 from __future__ import annotations
 
@@ -18,6 +21,7 @@ from pathlib import Path
 
 MB = Path(__file__).resolve().parent.parent
 OUT = MB / "dataset/cross_session/oracle_files.json"
+OUT_PATCHES = MB / "dataset/cross_session/oracle_patches.json"
 DATASET = "SWE-bench-Live/SWE-bench-Live"
 SPLIT = "lite"
 
@@ -42,14 +46,20 @@ def main() -> None:
     }
     ds = load_dataset(DATASET, split=SPLIT)
     out: dict[str, list[str]] = {}
+    patches: dict[str, str] = {}
     for row in ds:
         iid = row["instance_id"]
         if iid in ids:
-            out[iid] = gold_files(row.get("patch", ""))
+            patch = row.get("patch", "") or ""
+            out[iid] = gold_files(patch)
+            patches[iid] = patch
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, indent=1))
+    OUT_PATCHES.write_text(json.dumps(patches, indent=1))
     covered = sum(1 for v in out.values() if v)
+    with_patch = sum(1 for v in patches.values() if v.strip())
     print(f"wrote {OUT}: {len(out)}/{len(ids)} instances, {covered} with files")
+    print(f"wrote {OUT_PATCHES}: {len(patches)}/{len(ids)} instances, {with_patch} with diff")
 
 
 def _selfcheck() -> None:

@@ -47,13 +47,14 @@ def build_memory_adapter(config: MemoryConfig) -> MemoryAdapter:
             top_k=config.top_k,
             max_memory_tokens=config.max_memory_tokens,
         )
-    if adapter == "oracle":
+    if adapter in {"oracle", "oracle_files", "oracle_strong"}:
         from .oracle import OracleMemoryAdapter
 
         return OracleMemoryAdapter(
             corpus_root=config.corpus_root,
             top_k=config.top_k,
             max_memory_tokens=config.max_memory_tokens,
+            mode="diff" if adapter == "oracle_strong" else "files",
         )
     if adapter == "graphify":
         from .graphify import GraphifyAdapter
